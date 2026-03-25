@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AQSAMS - Aviation Quality & Safety Management System
 
-## Getting Started
+AQSAMS is a high-fidelity, enterprise-grade digital platform designed for aviation safety oversight, compliance management, and operations control. It is built to maintain compliance with ICAO, IATA, and Nigerian Civil Aviation Regulations (Nig. CARs).
 
-First, run the development server:
+## 🚀 System Architecture
+- **Tech Stack**: Next.js 15+ (App Router), Tailwind CSS v4, Framer Motion, Iconsax.
+- **Modularity**: Clean separation of concerns with a dedicated `src/modules/` layer for scalable aviation logic.
+- **Safety Centric**: Built-in support for ICAO Annex 19 and NCAA Advisory Circulars.
 
+## 🛠️ Performance & Compliance Features
+- **Technical Audit Core**: Automated checklists for MEL/MMEL, Avionics Workshops, and SMS audits.
+- **Operations Console**: Real-time On-Time Performance (OTP) tracking with IATA Delay Code mapping.
+- **Regulatory Engine**: Pre-integrated mapping for Nig. CAR Part 20 and safety oversight standards.
+- **Findings Management**: Automated tracking, Level 1/2 finding alerts, and closure execution logs.
+
+## 🏁 Getting Started
+
+### Prerequisites
+- Node.js 18.x or higher
+- npm or yarn
+
+### Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd aviation-audit
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
+Since this project uses modern Next.js features and native bindings, if you encounter SWC/Turbopack issues on Windows, run the development server with:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev -- --webpack
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Project Structure
+```bash
+src/
+├── app/                  # Next.js App Router
+├── components/           # UI Components (Shadcn/UI)
+├── lib/                  # Utilities & Design System
+└── modules/
+    └── website/          # Landing Page & Marketing Module
+        ├── components/   # Aviation-specific components
+        ├── constants/    # Regulatory data & menu structures
+        └── views/        # Page views
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚖️ Regulatory Disclaimer
+This system is designed as a tool for safety management. Users must ensure all data collection is performed in accordance with their respective Civil Aviation Authority (CAA) manual of procedures.
