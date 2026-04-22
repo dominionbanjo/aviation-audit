@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth/server';
-import { upsertUser, findUserById } from '@/lib/services/user.service';
+import { upsertUser, updateUser } from '@/lib/services/user.service';
 import { NextResponse } from 'next/server';
 
 // GET /api/user/profile
@@ -30,5 +30,27 @@ export async function GET() {
   } catch (err) {
     console.error('[GET /api/user/profile]', err);
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+}
+
+// PATCH /api/user/profile
+export async function PATCH(req: Request) {
+  try {
+    const { data } = await auth.getSession();
+    const authUser = data?.user;
+
+    if (!authUser?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { name, role } = body;
+
+    const user = await updateUser(authUser.id, { name, role });
+
+    return NextResponse.json({ user });
+  } catch (err) {
+    console.error('[PATCH /api/user/profile]', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

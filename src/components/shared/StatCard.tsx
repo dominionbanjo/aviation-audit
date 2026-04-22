@@ -1,14 +1,16 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface StatCardProps {
   title: string;
   value: string | number;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   iconBgClass?: string;
   iconColorClass?: string;
   className?: string;
+  isLoading?: boolean;
 }
 
 export function StatCard({
@@ -18,16 +20,25 @@ export function StatCard({
   iconBgClass = "bg-primary/10",
   iconColorClass = "text-primary",
   className,
+  isLoading = false,
 }: StatCardProps) {
   return (
     <Card className={cn("overflow-hidden bg-muted/40 border-border/50 backdrop-blur shadow-none", className)}>
       <CardContent className="p-5 flex items-center gap-5">
         <div className={cn("h-14 w-14 rounded-xl flex items-center justify-center shrink-0 border border-border/50 shadow-inner", iconBgClass, iconColorClass)}>
-          {icon}
+          {isLoading ? (
+            <Skeleton className="h-6 w-6 rounded-full" />
+          ) : (
+            icon
+          )}
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1">
           <div className="text-3xl font-bold tracking-tight text-foreground">
-            {value}
+            {isLoading ? (
+              <Skeleton className="h-9 w-20" />
+            ) : (
+              value
+            )}
           </div>
           <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
             {title}

@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { useFormContext } from "react-hook-form"
 import {
@@ -29,9 +31,19 @@ interface FormSelectProps {
   icon?: React.ReactNode
   loading?: boolean
   className?: string
+  triggerClassName?: string
 }
 
-export function FormSelect({ name, label, options, placeholder, icon, loading, className }: FormSelectProps) {
+export function FormSelect({ 
+  name, 
+  label, 
+  options, 
+  placeholder, 
+  icon,
+  loading, 
+  className,
+  triggerClassName 
+}: FormSelectProps) {
   const { control } = useFormContext()
 
   return (
@@ -39,17 +51,22 @@ export function FormSelect({ name, label, options, placeholder, icon, loading, c
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
-          {label && <FormLabel>{label}</FormLabel>}
-          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loading}>
+        <FormItem className={cn("space-y-2", className)}>
+          {label && <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{label}</FormLabel>}
+          <Select 
+            onValueChange={field.onChange} 
+            defaultValue={field.value} 
+            value={field.value}
+            disabled={loading}
+          >
             <FormControl>
               <div className="relative">
                 {icon && (
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center text-muted-foreground pointer-events-none">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center text-muted-foreground pointer-events-none group-hover:text-foreground transition-colors">
                     {icon}
                   </div>
                 )}
-                <SelectTrigger className={cn(icon && "pl-10", className)}>
+                <SelectTrigger className={cn("bg-background h-10 transition-all focus:ring-primary/20", icon && "pl-10", triggerClassName)}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
               </div>
@@ -62,7 +79,7 @@ export function FormSelect({ name, label, options, placeholder, icon, loading, c
               ))}
             </SelectContent>
           </Select>
-          <FormMessage />
+          <FormMessage className="text-[10px]" />
         </FormItem>
       )}
     />

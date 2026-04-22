@@ -13,6 +13,7 @@ import {
   getFilteredRowModel,
   VisibilityState,
 } from "@tanstack/react-table";
+import { useForm, FormProvider } from "react-hook-form";
 
 import {
   Table,
@@ -24,19 +25,26 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft2, ArrowRight2, SearchNormal1, Setting4 } from "iconsax-react";
+import { ArrowLeft2, ArrowRight2, SearchNormal1, Setting4, FilterSearch } from "iconsax-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FormSelect } from "./FormSelect";
+
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey?: string;
   searchPlaceholder?: string;
+  filterKey?: string;
+  filterOptions?: { label: string; value: string }[];
+  filterPlaceholder?: string;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -44,6 +52,10 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = "Search...",
+  filterKey,
+  filterOptions,
+  filterPlaceholder = "Filter by...",
+  isLoading,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -66,6 +78,38 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const finalFilterOptions = React.useMemo(() => {
+    if (filterOptions) return filterOptions;
+    if (filterKey) {
+      const uniqueValues = Array.from(new Set(data.map((item: any) => item[filterKey])));
+      return [
+        { label: `All ${filterKey.replace(/([A-Z])/g, " $1").toLowerCase()}s`, value: "ALL_RECORDS" },
+        ...uniqueValues
+          .filter((v) => v !== null && v !== undefined && v !== "")
+          .map((val) => ({
+            label: String(val),
+            value: String(val),
+          })),
+      ];
+    }
+    return [];
+  }, [data, filterKey, filterOptions]);
+
+  const methods = useForm({
+    defaultValues: {
+      [filterKey || ""]: "ALL_RECORDS",
+    },
+  });
+
+  const { watch, setValue } = methods;
+  const filterValue = watch(filterKey || "");
+
+  React.useEffect(() => {
+    if (filterKey) {
+      table.getColumn(filterKey)?.setFilterValue(filterValue === "ALL_RECORDS" ? "" : filterValue);
+    }
+  }, [filterValue, filterKey, table]);
+
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -87,6 +131,19 @@ export function DataTable<TData, TValue>({
                 }
                 className="pl-10 h-10 bg-background"
               />
+            </div>
+          )}
+          {filterKey && finalFilterOptions.length > 0 && (
+            <div className="w-full max-w-[200px]">
+              <FormProvider {...methods}>
+                <FormSelect
+                  name={filterKey}
+                  options={finalFilterOptions}
+                  placeholder={filterPlaceholder}
+                  className="h-10 border-dashed"
+                  icon={<FilterSearch size={18} variant="Outline" color="currentColor" />}
+                />
+              </FormProvider>
             </div>
           )}
         </div>
@@ -125,7 +182,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id} className="border-border">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="py-4 px-6 text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+                    <TableHead key={header.id} className="py-4 px-6 text-xs uppercase tracking-widest text-muted-foreground font-semibold border-r border-border/50 last:border-r-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -139,7 +196,17 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+               Array.from({ length: 5 }).map((_, i) => (
+                 <TableRow key={`loading-${i}`} className="border-border">
+                    {columns.map((_, j) => (
+                      <TableCell key={`loading-cell-${j}`} className="py-4 px-6 border-r border-border/50 last:border-r-0">
+                         <Skeleton className="h-4 w-full" />
+                      </TableCell>
+                    ))}
+                 </TableRow>
+               ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -147,7 +214,7 @@ export function DataTable<TData, TValue>({
                   className="border-border hover:bg-muted/20"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 px-6">
+                    <TableCell key={cell.id} className="py-3 px-6 border-r border-border/50 last:border-r-0">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

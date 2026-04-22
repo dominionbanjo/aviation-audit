@@ -1,118 +1,138 @@
 "use client";
 
-import React from "react";
-import { Copy, DocumentText, SearchNormal1, AddCircle, Setting4, Edit2 } from "iconsax-react";
-import { StatCard } from "@/components/shared/StatCard";
-import { DataTable } from "@/components/shared/DataTable";
+import React, { useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/shared/DataTable";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatCard } from "@/components/shared/StatCard";
 import { Button } from "@/components/ui/button";
+import { AddCircle, DocumentText, Setting4, SearchNormal1, Edit2, Eye, Trash } from "iconsax-react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TemplateViewModal } from "@/components/audit/TemplateViewModal";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { toast } from "sonner"; // Using toast directly if registered, otherwise console.log as fallback
 
-// Temporary mockup data
-const templatesData = [
-  { id: "TPL-001", name: "Boeing 737 Line Maintenance", type: "Line Station", regs: "NCAA / MPM", status: "Active" },
-  { id: "TPL-002", name: "Avionics Workshop Audit", type: "Facility", regs: "Nig. CARs", status: "Draft" },
-  { id: "TPL-003", name: "Ground Support Equipment", type: "Ramp", regs: "IATA ISAGO", status: "Archived" },
-];
-
-export const columns: ColumnDef<typeof templatesData[0]>[] = [
-  {
-    accessorKey: "id",
-    header: "Ref ID",
-    cell: ({ row }) => <span className="font-mono text-xs">{row.getValue("id")}</span>,
-  },
-  {
-    accessorKey: "name",
-    header: "Template Name",
-    cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
-  },
-  {
-    accessorKey: "type",
-    header: "Location Type",
-  },
-  {
-    accessorKey: "regs",
-    header: "Regulatory Base",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const s = row.getValue("status") as string;
-      const tClass = s === "Active" ? "text-emerald-500 bg-emerald-500/10" : s === "Draft" ? "text-amber-500 bg-amber-500/10" : "text-slate-500 bg-slate-500/10";
-      return <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${tClass}`}>{s}</span>;
-    }
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      return (
-        <div className="flex justify-end gap-2 text-muted-foreground">
-           <button className="p-1.5 hover:bg-muted hover:text-foreground rounded transition-colors" title="Duplicate">
-             <Copy size={16} variant="Outline" color="currentColor" />
-           </button>
-           <button className="p-1.5 hover:bg-muted hover:text-primary rounded transition-colors" title="Edit">
-             <Edit2 size={16} variant="Outline" color="currentColor" />
-           </button>
-        </div>
-      );
-    },
-  },
-];
+import { 
+  useGetTemplatesQuery, 
+  useGetStatsQuery, 
+  useDeleteTemplateMutation 
+} from "@/redux/api/endpoints/templateEndpoints";
+import { TemplateWithMeta } from "@/lib/services/audit-template.service";
+import { getTemplateColumns } from "@/modules/audit-templates/columns";
 
 export default function AuditTemplatesPage() {
   const router = useRouter();
+  
+  // RTK Query Hooks
+  const { data: templatesData, isLoading: loading, error: templatesError } = useGetTemplatesQuery();
+  const { data: statsData, isLoading: statsLoading } = useGetStatsQuery();
+  const [deleteTemplate, { isLoading: isDeleting }] = useDeleteTemplateMutation();
+
+  const templates = templatesData?.templates ?? [];
+  const stats = statsData?.stats;
+  const error = templatesError ? "Failed to load templates" : null;
+
+  // Modal states
+  const [viewTemplateId, setViewTemplateId] = useState<string | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTemplateId) return;
+    try {
+      await deleteTemplate(deleteTemplateId).unwrap();
+      setDeleteTemplateId(null);
+      toast.success("Template deleted successfully");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.data?.error || "Failed to delete");
+    }
+  };
+
+  const columns = getTemplateColumns({
+    onView: (id) => setViewTemplateId(id),
+    onEdit: (id) => router.push(`/dashboard/audit/templates/${id}/edit`),
+    onDelete: (id) => setDeleteTemplateId(id),
+  });
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Audit Templates</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage standardized regulatory checklists and forms.
-          </p>
-        </div>
-        <Button onClick={() => router.push("/dashboard/audit/templates/new")} className="gap-2 h-10 shadow-lg" size="sm">
-          <AddCircle size={18} variant="Bold" color="currentColor" />
-          Create Template
-        </Button>
-      </div>
+      <PageHeader
+        title="Audit Templates"
+        description="Manage standardized regulatory checklists and forms used across audits."
+        action={
+          <Button onClick={() => router.push("/dashboard/audit/templates/new")} className="gap-2 h-10 shadow-lg w-full sm:w-auto">
+            <AddCircle size={18} variant="Bold" color="currentColor" />
+            Create Template
+          </Button>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
-          title="Active Templates"
-          value="12"
-          icon={<DocumentText size="24" variant="Bulk" color="currentColor" />}
+          title="Total Templates"
+          value={stats?.totalTemplates ?? 0}
+          isLoading={statsLoading}
+          icon={<DocumentText size={24} variant="Bulk" color="currentColor" />}
           iconBgClass="bg-blue-500/10 border-blue-500/20"
           iconColorClass="text-blue-500"
         />
         <StatCard
-          title="Draft Templates"
-          value="3"
-          icon={<Setting4 size="24" variant="Bulk" color="currentColor" />}
-          iconBgClass="bg-amber-500/10 border-amber-500/20"
-          iconColorClass="text-amber-500"
-        />
-        <StatCard
           title="Total Questions"
-          value="486"
-          icon={<SearchNormal1 size="24" variant="Bulk" color="currentColor" />}
+          value={stats?.totalQuestions ?? 0}
+          isLoading={statsLoading}
+          icon={<SearchNormal1 size={24} variant="Bulk" color="currentColor" />}
           iconBgClass="bg-emerald-500/10 border-emerald-500/20"
           iconColorClass="text-emerald-500"
         />
-      </div>
-
-      {/* Data Table Area */}
-      <div className="pt-4">
-        <DataTable 
-          columns={columns} 
-          data={templatesData} 
-          searchKey="name" 
-          searchPlaceholder="Search templates by name..." 
+        <StatCard
+          title="Avg. Questions/Template"
+          value={stats?.averageQuestionsPerTemplate ?? 0}
+          isLoading={statsLoading}
+          icon={<Setting4 size={24} variant="Bulk" color="currentColor" />}
+          iconBgClass="bg-amber-500/10 border-amber-500/20"
+          iconColorClass="text-amber-500"
         />
       </div>
+
+      {/* Table */}
+      <div className="pt-2 flex-grow">
+        {loading ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-md" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-destructive text-sm bg-destructive/5 rounded-xl border border-destructive/20">{error}</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={templates}
+            searchKey="name"
+            searchPlaceholder="Search templates by name..."
+            filterKey="locationType"
+          />
+        )}
+      </div>
+
+      <TemplateViewModal 
+        isOpen={!!viewTemplateId} 
+        onClose={() => setViewTemplateId(null)} 
+        templateId={viewTemplateId} 
+      />
+
+      <ConfirmDialog
+        isOpen={!!deleteTemplateId}
+        onClose={() => setDeleteTemplateId(null)}
+        onConfirm={handleDelete}
+        title="Delete Audit Template"
+        description="Are you sure you want to permanently delete this template? This will remove all category groups and questions. Any historical audits linked to this template will be preserved as snapshotted records."
+        confirmText="Delete Template"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

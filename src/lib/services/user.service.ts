@@ -44,3 +44,17 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 
   return result[0] ?? null;
 }
+
+// ─── Update ───────────────────────────────────────────────────────────────────
+export async function updateUser(id: string, payload: Partial<Omit<User, "id" | "email" | "createdAt">>): Promise<User> {
+  const result = await db
+    .update(users)
+    .set({
+      ...payload,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, id))
+    .returning();
+
+  return result[0];
+}
