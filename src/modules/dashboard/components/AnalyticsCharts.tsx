@@ -134,7 +134,7 @@ export const AnalyticsCharts: React.FC = () => {
                 ))}
                 <div className="mt-2 pt-4 border-t border-border flex justify-center sm:justify-start">
                   <Link href="/dashboard/audits" className="text-xs text-primary font-bold uppercase tracking-wider flex items-center hover:opacity-80 transition-opacity">
-                    Go to Audits <ArrowRight2 size="14" variant="Outline" className="ml-2" />
+                    Go to Audits <ArrowRight2 size="14" variant="Outline" color="currentColor" className="ml-2" />
                   </Link>
                 </div>
               </div>

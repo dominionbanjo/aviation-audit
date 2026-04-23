@@ -18,7 +18,7 @@ export const RecentActivity: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <CardTitle className="text-lg font-bold">Recent Audits</CardTitle>
           <Link href="/dashboard/audits" className="text-sm text-primary hover:underline font-medium inline-flex items-center">
-            View All <ArrowRight2 size="14" className="ml-1" />
+            View All <ArrowRight2 size="14" variant="Outline" color="currentColor" className="ml-1" />
           </Link>
         </CardHeader>
         <CardContent className="p-0 overflow-hidden">
@@ -62,7 +62,7 @@ export const RecentActivity: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <CardTitle className="text-lg font-bold">Recent Findings</CardTitle>
           <Link href="/dashboard/audits" className="text-sm text-primary hover:underline font-medium inline-flex items-center">
-            View All <ArrowRight2 size="14" className="ml-1" />
+            View All <ArrowRight2 size="14" variant="Outline" color="currentColor" className="ml-1" />
           </Link>
         </CardHeader>
         <CardContent className="p-0 overflow-hidden">

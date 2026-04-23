@@ -14,7 +14,7 @@ export const DashboardSummary: React.FC = () => {
         title="Total Audits"
         value={summary?.totalAudits ?? 0}
         isLoading={isLoading}
-        icon={<DocumentText size="24" variant="Bulk" color="currentColor" />}
+        icon={<DocumentText size="24" variant="Bold" color="currentColor" />}
         iconBgClass="bg-blue-500/10 border-blue-500/20"
         iconColorClass="text-blue-500"
       />
@@ -22,7 +22,7 @@ export const DashboardSummary: React.FC = () => {
         title="Open Findings"
         value={summary?.openFindings ?? 0}
         isLoading={isLoading}
-        icon={<Warning2 size="24" variant="Bulk" color="currentColor" />}
+        icon={<Warning2 size="24" variant="Bold" color="currentColor" />}
         iconBgClass="bg-amber-500/10 border-amber-500/20"
         iconColorClass="text-amber-500"
       />
@@ -30,7 +30,7 @@ export const DashboardSummary: React.FC = () => {
         title="Critical Findings"
         value={summary?.criticalFindings ?? 0}
         isLoading={isLoading}
-        icon={<Warning2 size="24" variant="Bulk" color="currentColor" />}
+        icon={<Warning2 size="24" variant="Bold" color="currentColor" />}
         iconBgClass="bg-red-500/10 border-red-500/20"
         iconColorClass="text-red-500"
       />
@@ -38,7 +38,7 @@ export const DashboardSummary: React.FC = () => {
         title="Compliance Score"
         value={summary?.complianceScore ?? "0%"}
         isLoading={isLoading}
-        icon={<ShieldTick size="24" variant="Bulk" color="currentColor" />}
+        icon={<ShieldTick size="24" variant="Bold" color="currentColor" />}
         iconBgClass="bg-emerald-500/10 border-emerald-500/20"
         iconColorClass="text-emerald-500"
       />

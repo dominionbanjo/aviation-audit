@@ -48,7 +48,7 @@ export const OTP = () => {
                   ].map((item, i) => (
                     <div key={i} className="flex flex-col gap-4 p-5 bg-white/5 border border-white/10 rounded-lg">
                        <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center border border-primary/30">
-                          <item.icon size={20} variant="Bulk" color="currentColor" className="text-primary" />
+                          <item.icon size={20} variant="Bold" color="currentColor" className="text-primary" />
                        </div>
                        <div>
                           <h4 className="font-bold text-sm mb-1">{item.title}</h4>

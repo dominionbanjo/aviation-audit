@@ -96,7 +96,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
               >
                 <Icon
                   size={22}
-                  variant={isActive ? "Bulk" : "Outline"}
+                  variant={isActive ? "Bold" : "Outline"}
                   color="currentColor"
                   className={cn(
                     "shrink-0 transition-colors",

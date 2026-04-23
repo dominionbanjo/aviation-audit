@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, text, integer, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, text, integer, varchar, index } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { users } from "./users";
 
@@ -22,6 +22,10 @@ export const auditCategories = pgTable("audit_categories", {
     .references(() => auditTemplates.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   orderIndex: integer("order_index").notNull().default(0),
+}, (table) => {
+  return {
+    templateIdIdx: index("idx_categories_template_id").on(table.templateId),
+  };
 });
 
 
@@ -38,6 +42,11 @@ export const auditQuestions = pgTable("audit_questions", {
   manualRef: varchar("manual_ref"),
   orderIndex: integer("order_index").notNull().default(0),
   severity: varchar("severity", { length: 20 }).notNull().default("Minor"),
+}, (table) => {
+  return {
+    templateIdIdx: index("idx_questions_template_id").on(table.templateId),
+    categoryIdIdx: index("idx_questions_category_id").on(table.categoryId),
+  };
 });
 
 

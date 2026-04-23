@@ -48,7 +48,7 @@ export default function AuditsHistoryPage() {
           title="Total Audits Done"
           value={stats?.totalAuditsDone?.toLocaleString() || "0"}
           isLoading={statsLoading}
-          icon={<TickCircle size="24" variant="Bulk" color="currentColor" />}
+          icon={<TickCircle size="24" variant="Bold" color="currentColor" />}
           iconBgClass="bg-emerald-500/10 border-emerald-500/20"
           iconColorClass="text-emerald-500"
         />
@@ -56,7 +56,7 @@ export default function AuditsHistoryPage() {
           title="Active / In-progress"
           value={stats?.activeAudits?.toLocaleString() || "0"}
           isLoading={statsLoading}
-          icon={<PlayCircle size="24" variant="Bulk" color="currentColor" />}
+          icon={<PlayCircle size="24" variant="Bold" color="currentColor" />}
           iconBgClass="bg-amber-500/10 border-amber-500/20"
           iconColorClass="text-amber-500"
         />
@@ -64,7 +64,7 @@ export default function AuditsHistoryPage() {
           title="Audit Locations"
           value={stats?.uniqueLocations?.toLocaleString() || "0"}
           isLoading={statsLoading}
-          icon={<DocumentText size="24" variant="Bulk" color="currentColor" />}
+          icon={<DocumentText size="24" variant="Bold" color="currentColor" />}
           iconBgClass="bg-blue-500/10 border-blue-500/20"
           iconColorClass="text-blue-500"
         />

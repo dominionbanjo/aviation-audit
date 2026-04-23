@@ -3,8 +3,9 @@ import {
   auditTemplates,
   auditCategories,
   auditQuestions,
+  users,
 } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import type {
   AuditTemplate,
   InsertAuditTemplate,
@@ -13,8 +14,8 @@ import type {
 } from "@/lib/db/schema";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-export type QuestionInput = { query: string; manualRef?: string; orderIndex: number };
-export type CategoryInput = { name: string; orderIndex: number; questions: QuestionInput[] };
+export type QuestionInput = { id?: string; query: string; manualRef?: string; orderIndex: number };
+export type CategoryInput = { id?: string; name: string; orderIndex: number; questions: QuestionInput[] };
 
 export interface CreateTemplatePayload {
   name: string;
@@ -33,26 +34,39 @@ export type TemplateWithMeta = AuditTemplate & {
 
 // ─── List All Templates ────────────────────────────────────────────────────────
 export async function getTemplates(): Promise<TemplateWithMeta[]> {
-  const rows = await db.query.auditTemplates.findMany({
-    orderBy: [desc(auditTemplates.createdAt)],
-    with: {
-      creator: { columns: { name: true, email: true } },
-      categories: {
-        with: { questions: { columns: { id: true } } },
-        columns: { id: true },
-      },
-    },
-  });
+  const rows = await db
+    .select({
+      id: auditTemplates.id,
+      name: auditTemplates.name,
+      locationType: auditTemplates.locationType,
+      regulatoryBase: auditTemplates.regulatoryBase,
+      createdBy: auditTemplates.createdBy,
+      createdAt: auditTemplates.createdAt,
+      updatedAt: auditTemplates.updatedAt,
+      creatorName: users.name,
+      creatorEmail: users.email,
+      categoryCount: sql<number>`count(distinct ${auditCategories.id})`.mapWith(Number),
+      questionCount: sql<number>`count(${auditQuestions.id})`.mapWith(Number),
+    })
+    .from(auditTemplates)
+    .leftJoin(users, eq(users.id, auditTemplates.createdBy))
+    .leftJoin(auditCategories, eq(auditCategories.templateId, auditTemplates.id))
+    .leftJoin(auditQuestions, eq(auditQuestions.templateId, auditTemplates.id))
+    .groupBy(auditTemplates.id, users.name, users.email)
+    .orderBy(desc(auditTemplates.createdAt));
 
-  return rows.map((t) => ({
-    ...t,
-    creator: t.creator ?? null,
-    categoryCount: t.categories.length,
-    questionCount: t.categories.reduce(
-      (sum, cat) => sum + cat.questions.length,
-      0
-    ),
-  }));
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    locationType: r.locationType,
+    regulatoryBase: r.regulatoryBase,
+    createdBy: r.createdBy,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    creator: r.creatorEmail ? { name: r.creatorName, email: r.creatorEmail } : null,
+    categoryCount: Number(r.categoryCount),
+    questionCount: Number(r.questionCount),
+  })) ;
 }
 
 
@@ -89,7 +103,7 @@ export async function createTemplate(payload: CreateTemplatePayload): Promise<st
     // 2. For each category, insert and then insert its questions
     for (const cat of categories) {
       const [category] = await tx
-        .insert(auditCategories)
+         .insert(auditCategories)
         .values({
           templateId: template.id,
           name: cat.name,
@@ -139,30 +153,64 @@ export async function updateTemplate(
       .set({ name, locationType, regulatoryBase, updatedAt: new Date() })
       .where(eq(auditTemplates.id, id));
 
-    // 2. Delete existing categories (Cascade deletes questions)
-    await tx.delete(auditCategories).where(eq(auditCategories.templateId, id));
+    // 2. Fetch existing categories and questions to diff
+    const currentCategories = await tx.query.auditCategories.findMany({
+      where: eq(auditCategories.templateId, id),
+      with: { questions: true }
+    });
 
-    // 3. Re-insert new categories and questions
+    const currentCatIds = currentCategories.map(c => c.id);
+    const incomingCatIds = categories.map(c => c.id).filter((cid): cid is string => Boolean(cid));
+
+    // 3. Delete removed categories
+    const catsToDelete = currentCatIds.filter(cid => !incomingCatIds.includes(cid));
+    if (catsToDelete.length > 0) {
+      await tx.delete(auditCategories).where(sql`${auditCategories.id} IN ${catsToDelete}`);
+    }
+
+    // 4. Process incoming categories
     for (const cat of categories) {
-      const [category] = await tx
-        .insert(auditCategories)
-        .values({
-          templateId: id,
-          name: cat.name,
-          orderIndex: cat.orderIndex,
-        })
-        .returning({ id: auditCategories.id });
+      let categoryId = cat.id;
 
-      if (cat.questions.length > 0) {
-        await tx.insert(auditQuestions).values(
-          cat.questions.map((q) => ({
+      if (cat.id) {
+        // Update existing category
+        await tx.update(auditCategories)
+          .set({ name: cat.name, orderIndex: cat.orderIndex })
+          .where(eq(auditCategories.id, cat.id));
+      } else {
+        // Insert new category
+        const [newCat] = await tx.insert(auditCategories)
+          .values({ templateId: id, name: cat.name, orderIndex: cat.orderIndex })
+          .returning({ id: auditCategories.id });
+        categoryId = newCat.id;
+      }
+
+      // Diff questions within this category
+      const currentQuestions = currentCategories.find(c => c.id === categoryId)?.questions ?? [];
+      const currentQuestIds = currentQuestions.map(q => q.id);
+      const incomingQuestIds = cat.questions.map(q => q.id).filter((qid): qid is string => Boolean(qid));
+
+      // Delete removed questions
+      const questsToDelete = currentQuestIds.filter(qid => !incomingQuestIds.includes(qid));
+      if (questsToDelete.length > 0) {
+        await tx.delete(auditQuestions).where(sql`${auditQuestions.id} IN ${questsToDelete}`);
+      }
+
+      // Update/Insert questions
+      for (const q of cat.questions) {
+        if (q.id) {
+          await tx.update(auditQuestions)
+            .set({ query: q.query, manualRef: q.manualRef ?? null, orderIndex: q.orderIndex })
+            .where(eq(auditQuestions.id, q.id));
+        } else {
+          await tx.insert(auditQuestions).values({
             templateId: id,
-            categoryId: category.id,
+            categoryId: categoryId as string,
             query: q.query,
             manualRef: q.manualRef ?? null,
-            orderIndex: q.orderIndex,
-          }))
-        );
+            orderIndex: q.orderIndex
+          });
+        }
       }
     }
   });
@@ -170,16 +218,19 @@ export async function updateTemplate(
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 export async function getAuditTemplatesStats() {
-  const templates = await db.select().from(auditTemplates);
-  const questions = await db.select().from(auditQuestions);
+  const [{ count: totalTemplates }] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(auditTemplates);
 
-  const totalTemplates = templates.length;
-  const totalQuestions = questions.length;
-  const averageQuestionsPerTemplate = totalTemplates > 0 ? Math.round(totalQuestions / totalTemplates) : 0;
+  const [{ count: totalQuestions }] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(auditQuestions);
+
+  const avg = Number(totalTemplates) > 0 ? Math.round(Number(totalQuestions) / Number(totalTemplates)) : 0;
 
   return {
-    totalTemplates,
-    totalQuestions,
-    averageQuestionsPerTemplate,
+    totalTemplates: Number(totalTemplates),
+    totalQuestions: Number(totalQuestions),
+    averageQuestionsPerTemplate: avg,
   };
 }

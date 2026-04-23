@@ -55,7 +55,7 @@ export const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             <Button size="lg" className="rounded-lg px-8 h-12 text-sm font-bold shadow-2xl shadow-primary/20 bg-primary hover:bg-primary/90">
                ACCESS TERMINAL
-               <Cpu size={18} variant="Bulk" color="currentColor" className="ml-2" />
+               <Cpu size={18} variant="Bold" color="currentColor" className="ml-2" />
             </Button>
             <Button size="lg" variant="outline" className="rounded-lg px-8 h-12 text-sm font-bold border-border hover:bg-muted/50">
                VIEW REGULATORY SPECS
@@ -71,7 +71,7 @@ export const Hero = () => {
              ].map((item, i) => (
                <div key={i} className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 text-primary">
-                    <item.icon size={16} variant="Bulk" color="currentColor" />
+                    <item.icon size={16} variant="Bold" color="currentColor" />
                     <span className="text-[10px] font-mono opacity-50">{item.code}</span>
                   </div>
                   <span className="text-xs font-bold leading-none">{item.label}</span>
@@ -123,7 +123,7 @@ export const Hero = () => {
                            {[1, 2].map(i => (
                               <div key={i} className="flex items-center gap-4 bg-muted/30 p-3 rounded-md border border-border/50">
                                  <div className="w-8 h-8 rounded bg-background flex items-center justify-center border border-border text-primary">
-                                    <DocumentText size={14} variant="Bulk" color="currentColor" />
+                                    <DocumentText size={14} variant="Bold" color="currentColor" />
                                  </div>
                                  <div className="flex-1 space-y-1.5">
                                     <div className="h-2 w-1/2 bg-muted rounded-full" />
@@ -137,7 +137,7 @@ export const Hero = () => {
 
                      <div className="grid grid-cols-2 gap-4">
                         <div className="bg-primary/5 border border-primary/10 rounded-lg p-4 h-32 flex flex-col justify-between">
-                           <Chart size={20} variant="Bulk" color="currentColor" className="text-primary" />
+                           <Chart size={20} variant="Bold" color="currentColor" className="text-primary" />
                            <div className="text-[10px] font-mono">KPI_SCORE: 112%</div>
                         </div>
                         <div className="bg-background/40 border border-border rounded-lg p-4 h-32" />

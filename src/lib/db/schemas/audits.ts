@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, text, uniqueIndex, uuid, index } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { users } from "./users";
 import { auditTemplates } from "./audit-templates";
@@ -19,6 +19,12 @@ export const audits = pgTable("audits", {
   status: varchar("status").notNull().default("in-progress"), // 'in-progress' | 'completed'
   startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
+}, (table) => {
+  return {
+    startedAtIdx: index("idx_audits_started_at").on(table.startedAt),
+    statusIdx: index("idx_audits_status").on(table.status),
+    templateIdIdx: index("idx_audits_template_id").on(table.templateId),
+  };
 });
 
 
@@ -37,6 +43,9 @@ export const auditResponses = pgTable("audit_responses", {
 }, (table) => {
   return {
     auditQuestionIdx: uniqueIndex("audit_question_idx").on(table.auditId, table.questionId),
+    auditIdIdx: index("idx_responses_audit_id").on(table.auditId),
+    questionIdIdx: index("idx_responses_question_id").on(table.questionId),
+    valueIdx: index("idx_responses_value").on(table.responseValue),
   };
 });
 

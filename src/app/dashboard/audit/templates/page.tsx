@@ -75,7 +75,7 @@ export default function AuditTemplatesPage() {
           title="Total Templates"
           value={stats?.totalTemplates ?? 0}
           isLoading={statsLoading}
-          icon={<DocumentText size={24} variant="Bulk" color="currentColor" />}
+          icon={<DocumentText size={24} variant="Bold" color="currentColor" />}
           iconBgClass="bg-blue-500/10 border-blue-500/20"
           iconColorClass="text-blue-500"
         />
@@ -83,7 +83,7 @@ export default function AuditTemplatesPage() {
           title="Total Questions"
           value={stats?.totalQuestions ?? 0}
           isLoading={statsLoading}
-          icon={<SearchNormal1 size={24} variant="Bulk" color="currentColor" />}
+          icon={<SearchNormal1 size={24} variant="Bold" color="currentColor" />}
           iconBgClass="bg-emerald-500/10 border-emerald-500/20"
           iconColorClass="text-emerald-500"
         />
@@ -91,7 +91,7 @@ export default function AuditTemplatesPage() {
           title="Avg. Questions/Template"
           value={stats?.averageQuestionsPerTemplate ?? 0}
           isLoading={statsLoading}
-          icon={<Setting4 size={24} variant="Bulk" color="currentColor" />}
+          icon={<Setting4 size={24} variant="Bold" color="currentColor" />}
           iconBgClass="bg-amber-500/10 border-amber-500/20"
           iconColorClass="text-amber-500"
         />

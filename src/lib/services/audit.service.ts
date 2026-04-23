@@ -12,20 +12,33 @@ export interface AuditWithMeta extends Audit {
 
 // ─── List Audits ──────────────────────────────────────────────────────────────
 export async function getAudits(): Promise<AuditWithMeta[]> {
-  const rows = await db.query.audits.findMany({
-    orderBy: [desc(audits.startedAt)],
-    with: {
-      template: { columns: { name: true } },
-      auditor: { columns: { name: true } },
-      responses: { columns: { id: true } },
-    },
-  });
+  const rows = await db
+    .select({
+      id: audits.id,
+      refNo: audits.refNo,
+      templateId: audits.templateId,
+      auditorId: audits.auditorId,
+      location: audits.location,
+      date: audits.date,
+      status: audits.status,
+      startedAt: audits.startedAt,
+      completedAt: audits.completedAt,
+      templateName: auditTemplates.name,
+      auditorName: users.name,
+      responseCount: sql<number>`count(${auditResponses.id})`.mapWith(Number),
+    })
+    .from(audits)
+    .leftJoin(auditTemplates, eq(auditTemplates.id, audits.templateId))
+    .leftJoin(users, eq(users.id, audits.auditorId))
+    .leftJoin(auditResponses, eq(auditResponses.auditId, audits.id))
+    .groupBy(audits.id, auditTemplates.name, users.name)
+    .orderBy(desc(audits.startedAt));
 
-  return rows.map((a) => ({
-    ...a,
-    templateName: a.template?.name ?? "Unknown Template",
-    auditorName: a.auditor?.name ?? "Unknown Auditor",
-    responseCount: a.responses.length,
+  return rows.map(r => ({
+    ...r,
+    templateName: r.templateName ?? "Unknown Template",
+    auditorName: r.auditorName ?? "Unknown Auditor",
+    responseCount: Number(r.responseCount)
   }));
 }
 
@@ -37,15 +50,24 @@ export async function startAudit(payload: {
 }): Promise<string> {
   const { templateId, auditorId, location } = payload;
 
-  // Generate Reference Number: AD-YYYYMMDD-XXXX
   const today = new Date();
   const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
   
-  // Get count for today to increment sequence
+  // OPTIMIZATION: Use index-friendly date range instead of date_trunc
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
   const todayAudits = await db
     .select({ count: sql<number>`count(*)` })
     .from(audits)
-    .where(sql`date_trunc('day', ${audits.startedAt}) = date_trunc('day', now())`);
+    .where(
+      and(
+        sql`${audits.startedAt} >= ${startOfDay}`,
+        sql`${audits.startedAt} <= ${endOfDay}`
+      )
+    );
   
   const seq = (Number(todayAudits[0]?.count || 0) + 1).toString().padStart(4, "0");
   const refNo = `AD-${dateStr}-${seq}`;
@@ -83,15 +105,13 @@ export async function saveAuditResponse(payload: {
       comment: comment ?? null,
     })
     .onConflictDoUpdate({
-      target: [auditResponses.auditId, auditResponses.questionId], // Wait, does schema have this unique constraint?
+      target: [auditResponses.auditId, auditResponses.questionId],
       set: {
         responseValue,
         comment: comment ?? null,
       },
     });
 }
-// Note: I need to check if the schema has a unique constraint on [auditId, questionId].
-// If not, I should add it or use an exist-then-update logic.
 
 // ─── Complete Audit ───────────────────────────────────────────────────────────
 export async function completeAudit(id: string): Promise<void> {
@@ -106,16 +126,24 @@ export async function completeAudit(id: string): Promise<void> {
 
 // ─── Get Audit Stats ──────────────────────────────────────────────────────────
 export async function getAuditStats() {
-  const allAudits = await db.select().from(audits);
-  
-  const totalAuditsDone = allAudits.filter(a => a.status === "completed").length;
-  const activeAudits = allAudits.filter(a => a.status === "in-progress").length;
-  const uniqueLocations = new Set(allAudits.map(a => a.location.toUpperCase())).size;
+  const [{ count: totalCompleted }] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(audits)
+    .where(eq(audits.status, "completed"));
+
+  const [{ count: totalInProgress }] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(audits)
+    .where(eq(audits.status, "in-progress"));
+
+  const [{ count: uniqueLocations }] = await db
+    .select({ count: sql<number>`count(distinct lower(${audits.location}))` })
+    .from(audits);
 
   return {
-    totalAuditsDone,
-    activeAudits,
-    uniqueLocations,
+    totalAuditsDone: Number(totalCompleted),
+    activeAudits: Number(totalInProgress),
+    uniqueLocations: Number(uniqueLocations),
   };
 }
 
@@ -126,16 +154,19 @@ export async function getAuditStats() {
  */
 export async function getDashboardSummary() {
   try {
-    const allAudits = await db.select().from(audits);
-    const allResponses = await db.select().from(auditResponses);
-    
-    const totalAudits = allAudits.length;
-    const openFindings = allResponses.filter(r => r.responseValue === "UNSAT").length;
+    const [{ count: totalAudits }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(audits);
+
+    const [{ count: openFindings }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(auditResponses)
+      .where(eq(auditResponses.responseValue, "UNSAT"));
     
     // For critical findings, we need to join with questions to see the severity
     let criticalFindingsCount = 0;
     try {
-      const criticalFindings = await db
+      const criticalResult = await db
         .select({ count: sql<number>`count(*)` })
         .from(auditResponses)
         .innerJoin(auditQuestions, eq(auditResponses.questionId, auditQuestions.id))
@@ -143,22 +174,25 @@ export async function getDashboardSummary() {
           eq(auditResponses.responseValue, "UNSAT"),
           eq(auditQuestions.severity, "Critical")
         ));
-      criticalFindingsCount = Number(criticalFindings[0]?.count || 0);
+      criticalFindingsCount = Number(criticalResult[0]?.count || 0);
     } catch (e) {
-      console.warn("Severity columns missing, using fallback for critical findings");
-      criticalFindingsCount = allResponses.filter(r => r.responseValue === "UNSAT").length; // Fallback
+      console.warn("Severity columns missing or error, using fallback for critical findings");
+      criticalFindingsCount = Number(openFindings); // Fallback
     }
 
     // Compliance Score: SAT / (SAT + UNSAT)
-    const satCount = allResponses.filter(r => r.responseValue === "SAT").length;
-    const unsatCount = allResponses.filter(r => r.responseValue === "UNSAT").length;
-    const complianceScore = (satCount + unsatCount) > 0 
-      ? Math.round((satCount / (satCount + unsatCount)) * 100) 
+    const [{ count: satCount }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(auditResponses)
+      .where(eq(auditResponses.responseValue, "SAT"));
+
+    const complianceScore = (Number(satCount) + Number(openFindings)) > 0 
+      ? Math.round((Number(satCount) / (Number(satCount) + Number(openFindings))) * 100) 
       : 100;
 
     return {
-      totalAudits,
-      openFindings,
+      totalAudits: Number(totalAudits),
+      openFindings: Number(openFindings),
       criticalFindings: criticalFindingsCount,
       complianceScore: `${complianceScore}%`,
     };
@@ -166,6 +200,13 @@ export async function getDashboardSummary() {
     console.error("Dashboard Summary Error:", err);
     return { totalAudits: 0, openFindings: 0, criticalFindings: 0, complianceScore: "0%" };
   }
+}
+
+export interface FindingItem {
+  desc: string;
+  audit: string;
+  sev: string;
+  color: string;
 }
 
 /**
@@ -181,7 +222,7 @@ export async function getDashboardRecent() {
       }
     });
 
-    let recentFindings: any[] = [];
+    let recentFindings: FindingItem[] = [];
     try {
       const recentFindingsRaw = await db.query.auditResponses.findMany({
         limit: 5,
@@ -209,7 +250,7 @@ export async function getDashboardRecent() {
       });
       recentFindings = baseFindings.map(f => ({
         desc: "Requires Audit Review",
-        audit: f.audit?.refNo || "Unknown",
+        audit: (f.audit as any)?.refNo || "Unknown", // Temporarily keeping any for the nested join until I fix types for baseFindings
         sev: "Minor",
         color: "text-blue-500 bg-blue-500/10 border-blue-500/20"
       }));
@@ -237,18 +278,45 @@ export async function getDashboardRecent() {
  */
 export async function getDashboardCharts() {
   try {
-    const last6Months = Array.from({ length: 6 }, (_, i) => {
+    const last6MonthsDates = Array.from({ length: 6 }, (_, i) => {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
-      return d.toLocaleString('default', { month: 'short' });
+      d.setDate(1); // Start of month
+      d.setHours(0, 0, 0, 0);
+      return d;
     }).reverse();
 
-    const performanceData = last6Months.map(month => ({
-      month,
-      sat: 60 + Math.floor(Math.random() * 30),
-      unsat: 10 + Math.floor(Math.random() * 20),
+    // PERFORMANCE DATA: Real Sat vs Unsat counts per month
+    const performanceData = await Promise.all(last6MonthsDates.map(async (monthStart) => {
+      const monthEnd = new Date(monthStart);
+      monthEnd.setMonth(monthEnd.getMonth() + 1);
+
+      const [{ count: sat }] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(auditResponses)
+        .where(and(
+          eq(auditResponses.responseValue, "SAT"),
+          sql`${auditResponses.createdAt} >= ${monthStart}`,
+          sql`${auditResponses.createdAt} < ${monthEnd}`
+        ));
+
+      const [{ count: unsat }] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(auditResponses)
+        .where(and(
+          eq(auditResponses.responseValue, "UNSAT"),
+          sql`${auditResponses.createdAt} >= ${monthStart}`,
+          sql`${auditResponses.createdAt} < ${monthEnd}`
+        ));
+
+      return {
+        month: monthStart.toLocaleString('default', { month: 'short' }),
+        sat: Number(sat),
+        unsat: Number(unsat),
+      };
     }));
 
+    // SEVERITY BREAKDOWN: Real distribution
     let severityData = [
       { name: "Critical", value: 0, color: "#ef4444" },
       { name: "Major", value: 0, color: "#f59e0b" },
@@ -271,7 +339,7 @@ export async function getDashboardCharts() {
         if (item) item.value = Number(s.count);
       });
     } catch (e) {
-      console.warn("Severity pie chart data failed (missing columns?), showing empty distribution");
+      console.warn("Severity pie chart data failed (missing columns/data), showing zeros");
     }
 
     return {

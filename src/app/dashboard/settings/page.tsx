@@ -79,7 +79,7 @@ export default function SettingsPage() {
             <CardHeader className="border-b bg-muted/20 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                  <UserTick size={20} variant="Bulk" />
+                  <UserTick size={20} variant="Bold" color="currentColor" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Auditor Profile</CardTitle>
@@ -114,7 +114,7 @@ export default function SettingsPage() {
 
                   <div className="pt-4 border-t flex justify-end">
                     <Button type="submit" disabled={isSaving} className="gap-2 h-10 px-8 shadow-lg">
-                      <Save2 size={18} variant="Bold" />
+                      <Save2 size={18} variant="Bold" color="currentColor" />
                       {isSaving ? "Saving..." : "Save Changes"}
                     </Button>
                   </div>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
             <CardHeader className="border-b bg-muted/20 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-amber-500/10 rounded-lg text-amber-600">
-                  <ShieldSecurity size={20} variant="Bulk" />
+                  <ShieldSecurity size={20} variant="Bold" color="currentColor" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Security & Access</CardTitle>
@@ -159,7 +159,7 @@ export default function SettingsPage() {
           <Card className="shadow-sm border-border/60 bg-primary/5 border-primary/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-primary">
-                <Profile2User size={18} variant="Bulk" />
+                <Profile2User size={18} variant="Bold" color="currentColor" />
                 Account Details
               </CardTitle>
             </CardHeader>

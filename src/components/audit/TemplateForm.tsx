@@ -191,7 +191,7 @@ export function TemplateForm({ mode, initialData }: TemplateFormProps) {
         <Card className="lg:col-span-1 shadow-sm h-fit sticky top-24">
           <CardHeader className="border-b bg-muted/20 pb-4">
             <CardTitle className="text-md flex items-center gap-2">
-              <Setting4 size={20} variant="Bulk" color="currentColor" className="text-primary" />
+              <Setting4 size={20} variant="Bold" color="currentColor" className="text-primary" />
               Template Properties
             </CardTitle>
           </CardHeader>
