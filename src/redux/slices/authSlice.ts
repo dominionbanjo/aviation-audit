@@ -30,7 +30,7 @@ export const loginUser = createAsyncThunk<
 
   if (!data.user) {
     // Fetch profile to get user since some auth responses only return session
-    const profileRes = await fetch('/api/user/profile');
+    const profileRes = await fetch('/api/protected/user/profile');
     const profileData = await profileRes.json() as { user?: User; error?: string };
     if (!profileRes.ok) return rejectWithValue('Login succeeded but profile fetch failed');
     return profileData.user as User;
@@ -60,7 +60,7 @@ export const signUpUser = createAsyncThunk<
   }
 
   if (!data.user) {
-    const profileRes = await fetch('/api/user/profile');
+    const profileRes = await fetch('/api/protected/user/profile');
     const profileData = await profileRes.json() as { user?: User; error?: string };
     if (!profileRes.ok) return rejectWithValue('Sign up succeeded but profile fetch failed');
     return profileData.user as User;
@@ -74,7 +74,7 @@ export const fetchProfile = createAsyncThunk<
   void,
   { rejectValue: string }
 >('auth/fetchProfile', async (_, { rejectWithValue }) => {
-  const res = await fetch('/api/user/profile');
+  const res = await fetch('/api/protected/user/profile');
   const data = await res.json() as { user?: User; error?: string };
   if (!res.ok) return rejectWithValue((data as { error?: string }).error || 'Failed to fetch profile');
   return data.user as User;

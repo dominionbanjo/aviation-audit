@@ -35,7 +35,7 @@ interface StatsResponse {
 export const templateApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getTemplates: builder.query<TemplatesResponse, void>({
-      query: () => "/audit/templates",
+      query: () => "/protected/audit/templates",
       providesTags: (result) =>
         result?.templates
           ? [
@@ -46,18 +46,18 @@ export const templateApi = apiSlice.injectEndpoints({
     }),
 
     getTemplate: builder.query<SingleTemplateResponse, string>({
-      query: (id) => `/audit/templates/${id}`,
+      query: (id) => `/protected/audit/templates/${id}`,
       providesTags: (result, error, id) => [{ type: "Templates", id }],
     }),
 
     getStats: builder.query<StatsResponse, void>({
-      query: () => "/audit/templates/stats",
+      query: () => "/protected/audit/templates/stats",
       providesTags: [{ type: "Stats", id: "GLOBAL" }],
     }),
 
     createTemplate: builder.mutation<{ templateId: string }, Omit<CreateTemplatePayload, "createdBy">>({
       query: (data) => ({
-        url: "/audit/templates",
+        url: "/protected/audit/templates",
         method: "POST",
         body: data,
       }),
@@ -66,7 +66,7 @@ export const templateApi = apiSlice.injectEndpoints({
 
     updateTemplate: builder.mutation<void, { id: string; data: Omit<CreateTemplatePayload, "createdBy"> }>({
       query: ({ id, data }) => ({
-        url: `/audit/templates/${id}`,
+        url: `/protected/audit/templates/${id}`,
         method: "PATCH",
         body: data,
       }),
@@ -78,7 +78,7 @@ export const templateApi = apiSlice.injectEndpoints({
 
     deleteTemplate: builder.mutation<{ message: string }, string>({
       query: (id) => ({
-        url: `/audit/templates/${id}`,
+        url: `/protected/audit/templates/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, id) => [

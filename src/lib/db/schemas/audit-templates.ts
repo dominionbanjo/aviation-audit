@@ -37,6 +37,7 @@ export const auditQuestions = pgTable("audit_questions", {
   query: text("query").notNull(),
   manualRef: varchar("manual_ref"),
   orderIndex: integer("order_index").notNull().default(0),
+  severity: varchar("severity", { length: 20 }).notNull().default("Minor"),
 });
 
 

@@ -1,18 +1,14 @@
-import { auth } from "@/lib/auth/server";
+import { withAuth } from "@/lib/api/withAuth";
 import { getAuditTemplatesStats } from "@/lib/services/audit-template.service";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+// ─── GET /api/protected/audit/templates/stats ─────────────────────────────────
+export const GET = withAuth(async () => {
   try {
-    const { data } = await auth.getSession();
-    if (!data?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const stats = await getAuditTemplatesStats();
     return NextResponse.json({ stats });
   } catch (err) {
-    console.error("[GET /api/audit/templates/stats]", err);
+    console.error("[GET /api/protected/audit/templates/stats]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+});

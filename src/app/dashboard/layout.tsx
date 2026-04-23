@@ -13,15 +13,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Auth guard — redirect to sign-in with return URL encoded as a query param
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isMounted && !isLoading && !isAuthenticated) {
       const returnUrl = encodeURIComponent(pathname);
       router.push(`/auth/sign-in?redirect=${returnUrl}`);
     }
-  }, [isLoading, isAuthenticated, router, pathname]);
+  }, [isMounted, isLoading, isAuthenticated, router, pathname]);
 
-  if (isLoading) {
+  if (!isMounted || isLoading) {
     return <PageLoading message="Verifying Identity..." />;
   }
 

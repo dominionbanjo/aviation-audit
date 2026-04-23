@@ -44,7 +44,7 @@ interface SingleAuditWithTemplate {
 export const auditApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAudits: builder.query<AuditsResponse, void>({
-      query: () => "/audits",
+      query: () => "/protected/audits",
       providesTags: (result) =>
         result?.audits
           ? [
@@ -55,18 +55,18 @@ export const auditApi = apiSlice.injectEndpoints({
     }),
 
     getAuditStats: builder.query<AuditStatsResponse, void>({
-      query: () => "/audits/stats",
+      query: () => "/protected/audits/stats",
       providesTags: [{ type: "Stats", id: "AUDITS" }],
     }),
 
     getAudit: builder.query<SingleAuditWithTemplate, string>({
-      query: (id) => `/audits/${id}`,
+      query: (id) => `/protected/audits/${id}`,
       providesTags: (result, error, id) => [{ type: "Audits", id }],
     }),
 
     startAudit: builder.mutation<{ auditId: string }, { templateId: string; location: string }>({
       query: (data) => ({
-        url: "/audits",
+        url: "/protected/audits",
         method: "POST",
         body: data,
       }),
@@ -75,7 +75,7 @@ export const auditApi = apiSlice.injectEndpoints({
 
     saveResponse: builder.mutation<void, { id: string; questionId: string; responseValue: string | null; comment?: string }>({
       query: ({ id, ...body }) => ({
-        url: `/audits/${id}/responses`,
+        url: `/protected/audits/${id}/responses`,
         method: "POST",
         body,
       }),
@@ -85,7 +85,7 @@ export const auditApi = apiSlice.injectEndpoints({
 
     completeAudit: builder.mutation<void, string>({
       query: (id) => ({
-        url: `/audits/${id}/complete`,
+        url: `/protected/audits/${id}/complete`,
         method: "PATCH",
       }),
       invalidatesTags: (result, error, id) => [
@@ -93,6 +93,28 @@ export const auditApi = apiSlice.injectEndpoints({
         { type: "Audits", id: "LIST" },
         { type: "Stats", id: "AUDITS" },
       ],
+    }),
+
+    getDashboardSummary: builder.query<{ totalAudits: number; openFindings: number; criticalFindings: number; complianceScore: string }, void>({
+      query: () => "/protected/audits/dashboard/summary",
+      providesTags: [{ type: "Stats", id: "DASHBOARD_SUMMARY" }],
+    }),
+
+    getDashboardRecent: builder.query<{ 
+      recentAudits: { id: string; ref: string; loc: string; date: string; status: string; color: string }[];
+      recentFindings: { desc: string; audit: string; sev: string; color: string }[];
+    }, void>({
+      query: () => "/protected/audits/dashboard/recent",
+      providesTags: [{ type: "Stats", id: "DASHBOARD_RECENT" }],
+    }),
+
+    getDashboardCharts: builder.query<{
+      performanceData: { month: string; sat: number; unsat: number }[];
+      severityData: { name: string; value: number; color: string }[];
+      totalFindings: number;
+    }, void>({
+      query: () => "/protected/audits/dashboard/charts",
+      providesTags: [{ type: "Stats", id: "DASHBOARD_CHARTS" }],
     }),
   }),
 });
@@ -104,4 +126,7 @@ export const {
   useStartAuditMutation,
   useSaveResponseMutation,
   useCompleteAuditMutation,
+  useGetDashboardSummaryQuery,
+  useGetDashboardRecentQuery,
+  useGetDashboardChartsQuery,
 } = auditApi;

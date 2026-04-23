@@ -15,13 +15,13 @@ interface UpdateProfileRequest {
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getProfile: builder.query<ProfileResponse, void>({
-      query: () => "/user/profile",
+      query: () => "/protected/user/profile",
       providesTags: [{ type: "Profile", id: "CURRENT" }],
     }),
 
     updateProfile: builder.mutation<ProfileResponse, UpdateProfileRequest>({
       query: (data) => ({
-        url: "/user/profile",
+        url: "/protected/user/profile",
         method: "PATCH",
         body: data,
       }),

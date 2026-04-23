@@ -33,6 +33,7 @@ export const auditResponses = pgTable("audit_responses", {
     .references(() => auditQuestions.id, { onDelete: "restrict" }),
   responseValue: varchar("response_value"), // 'SAT' | 'UNSAT' | 'N/A'
   comment: text("comment"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => {
   return {
     auditQuestionIdx: uniqueIndex("audit_question_idx").on(table.auditId, table.questionId),
