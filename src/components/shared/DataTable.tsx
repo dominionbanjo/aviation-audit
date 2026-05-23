@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FormSelect } from "./FormSelect";
+import { Pagination } from "./Pagination";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -45,6 +46,16 @@ interface DataTableProps<TData, TValue> {
   filterOptions?: { label: string; value: string }[];
   filterPlaceholder?: string;
   isLoading?: boolean;
+  serverPagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    limit: number;
+    onPageChange: (page: number) => void;
+    onLimitChange?: (limit: number) => void;
+  };
+  searchVal?: string;
+  onSearchChange?: (val: string) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -56,6 +67,9 @@ export function DataTable<TData, TValue>({
   filterOptions,
   filterPlaceholder = "Filter by...",
   isLoading,
+  serverPagination,
+  searchVal,
+  onSearchChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -125,9 +139,9 @@ export function DataTable<TData, TValue>({
               />
               <Input
                 placeholder={searchPlaceholder}
-                value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+                value={searchVal !== undefined ? searchVal : (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
                 onChange={(event) =>
-                  table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                  onSearchChange ? onSearchChange(event.target.value) : table.getColumn(searchKey)?.setFilterValue(event.target.value)
                 }
                 className="pl-10 h-10 bg-background"
               />
@@ -234,32 +248,43 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end space-x-2 py-2">
-        <div className="flex-1 text-sm text-muted-foreground">
-          Showing {table.getRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} records.
+      {serverPagination ? (
+        <Pagination
+          currentPage={serverPagination.currentPage}
+          totalPages={serverPagination.totalPages}
+          totalItems={serverPagination.totalItems}
+          limit={serverPagination.limit}
+          onPageChange={serverPagination.onPageChange}
+          onLimitChange={serverPagination.onLimitChange}
+        />
+      ) : (
+        <div className="flex items-center justify-end space-x-2 py-2">
+          <div className="flex-1 text-sm text-muted-foreground">
+            Showing {table.getRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} records.
+          </div>
+          <div className="space-x-2 flex">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="w-10 h-10 p-0 rounded-full"
+            >
+              <ArrowLeft2 size={18} variant="Outline" color="currentColor" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="w-10 h-10 p-0 rounded-full"
+            >
+              <ArrowRight2 size={18} variant="Outline" color="currentColor" />
+            </Button>
+          </div>
         </div>
-        <div className="space-x-2 flex">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="w-10 h-10 p-0 rounded-full"
-          >
-            <ArrowLeft2 size={18} variant="Outline" color="currentColor" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="w-10 h-10 p-0 rounded-full"
-          >
-            <ArrowRight2 size={18} variant="Outline" color="currentColor" />
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

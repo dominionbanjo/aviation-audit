@@ -11,6 +11,7 @@ export interface StatCardProps {
   iconColorClass?: string;
   className?: string;
   isLoading?: boolean;
+  description?: React.ReactNode;
 }
 
 export function StatCard({
@@ -21,6 +22,7 @@ export function StatCard({
   iconColorClass = "text-primary",
   className,
   isLoading = false,
+  description,
 }: StatCardProps) {
   return (
     <Card className={cn("overflow-hidden bg-muted/40 border-border/50 backdrop-blur shadow-none", className)}>
@@ -43,6 +45,11 @@ export function StatCard({
           <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
             {title}
           </div>
+          {description && !isLoading && (
+            <div className="mt-2">
+              {description}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

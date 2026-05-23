@@ -23,6 +23,6 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   keepUnusedDataFor: 60, // Standardize caching time to 60 seconds
-  tagTypes: ["Templates", "Stats", "Profile", "Audits"],
+  tagTypes: ["Templates", "Stats", "Profile", "Audits", "Otp", "Findings", "Airlines", "Routes", "DelayCategories"],
   endpoints: () => ({}), // Endpoints will be injected from modular files
 });

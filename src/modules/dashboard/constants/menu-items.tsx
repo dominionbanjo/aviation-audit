@@ -1,4 +1,4 @@
-import { Category, DocumentText, ChartSquare, Setting2, ShieldTick, TaskSquare, SearchStatus, Graph } from "iconsax-react";
+import { Category, DocumentText, ChartSquare, Setting2, ShieldTick, TaskSquare, SearchStatus, Graph, Airplane, Routing } from "iconsax-react";
 
 export const DASHBOARD_MENU_ITEMS = [
   {
@@ -27,7 +27,17 @@ export const DASHBOARD_MENU_ITEMS = [
     icon: ChartSquare,
   },
   {
-    label: "Compliance",
+    label: "Airlines Manager",
+    href: "/dashboard/airlines",
+    icon: Airplane,
+  },
+  {
+    label: "Routes Manager",
+    href: "/dashboard/routes",
+    icon: Routing,
+  },
+  {
+    label: "OTP Compliance",
     href: "/dashboard/compliance",
     icon: ShieldTick,
   },
