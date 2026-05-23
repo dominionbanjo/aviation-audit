@@ -39,13 +39,13 @@ export const getAuditColumns = (actions: ColumnActions): ColumnDef<AuditRecord>[
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const s = row.getValue("status") as string;
-      if (s === "Completed") return (
+      const s = (row.getValue("status") as string)?.toLowerCase();
+      if (s === "completed") return (
         <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest text-emerald-600 bg-emerald-500/10 flex w-fit items-center gap-1.5">
           <TickCircle size={12} variant="Bold" color="currentColor" /> Completed
         </span>
       );
-      if (s === "In-Progress") return (
+      if (s === "in-progress") return (
         <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest text-amber-600 bg-amber-500/10 flex w-fit items-center gap-1.5">
           <PlayCircle size={12} variant="Bold" color="currentColor" /> Active
         </span>
@@ -61,21 +61,21 @@ export const getAuditColumns = (actions: ColumnActions): ColumnDef<AuditRecord>[
     id: "actions",
     cell: ({ row }) => {
       const id = row.original.id;
-      const status = row.original.status;
+      const status = row.original.status?.toLowerCase();
       return (
         <div className="flex justify-end pr-4">
-           {status === "Completed" ? (
+           {status === "completed" ? (
              <Button 
                variant="ghost" size="sm" 
-               className="h-8 gap-2 text-primary hover:text-primary hover:bg-primary/10"
+               className="h-8 gap-2 text-primary hover:text-primary hover:bg-primary/10 font-semibold text-xs"
                onClick={() => actions.onView(id)}
              >
-               <DocumentText size={16} variant="Outline" color="currentColor" /> View Report
+               <DocumentText size={16} variant="Outline" color="currentColor" /> View Details
              </Button>
            ) : (
              <Button 
                variant="ghost" size="sm" 
-               className="h-8 gap-2 text-amber-600 hover:text-amber-700 hover:bg-amber-500/10"
+               className="h-8 gap-2 text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 font-semibold text-xs"
                onClick={() => actions.onResume(id)}
              >
                <Discover size={16} variant="Outline" color="currentColor" /> Resume
