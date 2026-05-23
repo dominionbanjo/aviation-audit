@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { audits, auditResponses, auditQuestions } from "@/lib/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
 import { auditTemplates, users } from "@/lib/db/schema";
 import type { Audit, AuditResponse, InsertAudit, InsertAuditResponse } from "@/lib/db/schema";
 
@@ -8,6 +8,65 @@ export interface AuditWithMeta extends Audit {
   templateName: string;
   auditorName: string | null;
   responseCount: number;
+}
+
+export async function getAuditsPaginated(options: { limit: number; offset: number; search?: string }): Promise<{ rows: AuditWithMeta[]; total: number }> {
+  let countQuery = db.select({ count: sql<number>`count(*)` }).from(audits).$dynamic();
+  
+  let query = db
+    .select({
+      id: audits.id,
+      refNo: audits.refNo,
+      templateId: audits.templateId,
+      auditorId: audits.auditorId,
+      location: audits.location,
+      date: audits.date,
+      status: audits.status,
+      startedAt: audits.startedAt,
+      completedAt: audits.completedAt,
+      templateName: auditTemplates.name,
+      auditorName: users.name,
+      responseCount: sql<number>`count(${auditResponses.id})`.mapWith(Number),
+    })
+    .from(audits)
+    .leftJoin(auditTemplates, eq(auditTemplates.id, audits.templateId))
+    .leftJoin(users, eq(users.id, audits.auditorId))
+    .leftJoin(auditResponses, eq(auditResponses.auditId, audits.id))
+    .groupBy(audits.id, auditTemplates.name, users.name)
+    .$dynamic();
+
+  if (options.search) {
+    const searchPattern = `%${options.search}%`;
+    query = query.where(
+      or(
+        ilike(audits.refNo, searchPattern),
+        ilike(audits.location, searchPattern),
+        ilike(auditTemplates.name, searchPattern)
+      )
+    );
+    countQuery = countQuery.where(
+      or(
+        ilike(audits.refNo, searchPattern),
+        ilike(audits.location, searchPattern)
+      )
+    );
+  }
+
+  const [{ count }] = await countQuery;
+
+  const rows = await query
+    .orderBy(desc(audits.startedAt))
+    .limit(options.limit)
+    .offset(options.offset);
+
+  const mappedRows = rows.map(r => ({
+    ...r,
+    templateName: r.templateName ?? "Unknown Template",
+    auditorName: r.auditorName ?? "Unknown Auditor",
+    responseCount: Number(r.responseCount)
+  }));
+
+  return { rows: mappedRows, total: Number(count || 0) };
 }
 
 // ─── List Audits ──────────────────────────────────────────────────────────────

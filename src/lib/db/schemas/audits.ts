@@ -40,6 +40,14 @@ export const auditResponses = pgTable("audit_responses", {
   responseValue: varchar("response_value"), // 'SAT' | 'UNSAT' | 'N/A'
   comment: text("comment"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+
+  // Findings & CAR Tracking Columns
+  rootCause: text("root_cause"),
+  correctiveAction: text("corrective_action"),
+  responsiblePerson: varchar("responsible_person"),
+  deadline: timestamp("deadline", { withTimezone: true }),
+  findingStatus: varchar("finding_status", { length: 20 }).default("open").notNull(), // 'open' | 'under-review' | 'closed'
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
 }, (table) => {
   return {
     auditQuestionIdx: uniqueIndex("audit_question_idx").on(table.auditId, table.questionId),

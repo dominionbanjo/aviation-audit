@@ -40,15 +40,30 @@ interface SingleAuditWithTemplate {
   };
 }
 
+interface PaginatedAuditsResponse {
+  data: AuditRecord[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 // ─── Endpoint Injection ───────────────────────────────────────────────────
 export const auditApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getAudits: builder.query<AuditsResponse, void>({
-      query: () => "/protected/audits",
+    getAudits: builder.query<PaginatedAuditsResponse, { page?: number; limit?: number; search?: string } | void>({
+      query: (params) => ({
+        url: "/protected/audits",
+        params: params || undefined,
+      }),
       providesTags: (result) =>
-        result?.audits
+        result?.data
           ? [
-              ...result.audits.map(({ id }) => ({ type: "Audits" as const, id })),
+              ...result.data.map(({ id }) => ({ type: "Audits" as const, id })),
               { type: "Audits", id: "LIST" },
             ]
           : [{ type: "Audits", id: "LIST" }],

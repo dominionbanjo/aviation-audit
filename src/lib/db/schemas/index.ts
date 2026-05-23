@@ -5,3 +5,4 @@
 export * from "./users";
 export * from "./audit-templates";
 export * from "./audits";
+export * from "./otp";
