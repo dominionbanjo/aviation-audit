@@ -5,7 +5,7 @@ import {
   auditQuestions,
   users,
 } from "@/lib/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, ilike } from "drizzle-orm";
 import type {
   AuditTemplate,
   InsertAuditTemplate,
@@ -67,6 +67,61 @@ export async function getTemplates(): Promise<TemplateWithMeta[]> {
     categoryCount: Number(r.categoryCount),
     questionCount: Number(r.questionCount),
   })) ;
+}
+
+export async function getTemplatesPaginated(options: { limit: number; offset: number; search?: string }): Promise<{ rows: TemplateWithMeta[]; total: number }> {
+  let countQuery = db
+    .select({ count: sql<number>`count(*)` })
+    .from(auditTemplates)
+    .$dynamic();
+
+  let query = db
+    .select({
+      id: auditTemplates.id,
+      name: auditTemplates.name,
+      locationType: auditTemplates.locationType,
+      regulatoryBase: auditTemplates.regulatoryBase,
+      createdBy: auditTemplates.createdBy,
+      createdAt: auditTemplates.createdAt,
+      updatedAt: auditTemplates.updatedAt,
+      creatorName: users.name,
+      creatorEmail: users.email,
+      categoryCount: sql<number>`count(distinct ${auditCategories.id})`.mapWith(Number),
+      questionCount: sql<number>`count(${auditQuestions.id})`.mapWith(Number),
+    })
+    .from(auditTemplates)
+    .leftJoin(users, eq(users.id, auditTemplates.createdBy))
+    .leftJoin(auditCategories, eq(auditCategories.templateId, auditTemplates.id))
+    .leftJoin(auditQuestions, eq(auditQuestions.templateId, auditTemplates.id))
+    .groupBy(auditTemplates.id, users.name, users.email)
+    .$dynamic();
+
+  if (options.search) {
+    const searchPattern = `%${options.search}%`;
+    query = query.where(ilike(auditTemplates.name, searchPattern));
+    countQuery = countQuery.where(ilike(auditTemplates.name, searchPattern));
+  }
+
+  const [{ count }] = await countQuery;
+  const rows = await query
+    .orderBy(desc(auditTemplates.createdAt))
+    .limit(options.limit)
+    .offset(options.offset);
+
+  const formattedRows: TemplateWithMeta[] = rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    locationType: r.locationType,
+    regulatoryBase: r.regulatoryBase,
+    createdBy: r.createdBy,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    creator: r.creatorEmail ? { name: r.creatorName, email: r.creatorEmail } : null,
+    categoryCount: Number(r.categoryCount),
+    questionCount: Number(r.questionCount),
+  }));
+
+  return { rows: formattedRows, total: Number(count || 0) };
 }
 
 

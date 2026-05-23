@@ -24,13 +24,23 @@ import { getTemplateColumns } from "@/modules/audit-templates/columns";
 
 export default function AuditTemplatesPage() {
   const router = useRouter();
+
+  // Local state for pagination and search
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState("");
   
   // RTK Query Hooks
-  const { data: templatesData, isLoading: loading, error: templatesError } = useGetTemplatesQuery();
+  const { data: templatesData, isLoading: loading, error: templatesError } = useGetTemplatesQuery({
+    page,
+    limit,
+    search,
+  });
   const { data: statsData, isLoading: statsLoading } = useGetStatsQuery();
   const [deleteTemplate, { isLoading: isDeleting }] = useDeleteTemplateMutation();
 
-  const templates = templatesData?.templates ?? [];
+  const templates = templatesData?.data ?? [];
+  const pagination = templatesData?.pagination;
   const stats = statsData?.stats;
   const error = templatesError ? "Failed to load templates" : null;
 
@@ -114,6 +124,22 @@ export default function AuditTemplatesPage() {
             searchKey="name"
             searchPlaceholder="Search templates by name..."
             filterKey="locationType"
+            serverPagination={{
+              currentPage: page,
+              totalPages: pagination?.totalPages ?? 1,
+              totalItems: pagination?.total ?? 0,
+              limit: limit,
+              onPageChange: (p) => setPage(p),
+              onLimitChange: (l) => {
+                setLimit(l);
+                setPage(1);
+              }
+            }}
+            searchVal={search}
+            onSearchChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
           />
         )}
       </div>

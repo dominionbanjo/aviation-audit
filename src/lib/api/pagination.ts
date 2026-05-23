@@ -12,6 +12,11 @@ export interface PaginatedData<T> {
   pagination: PaginationMeta;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
+
 export function getPaginationParams(urlStr: string, defaultLimit = 10) {
   const url = new URL(urlStr);
   const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));

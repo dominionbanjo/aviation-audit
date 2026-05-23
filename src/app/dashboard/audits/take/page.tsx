@@ -73,7 +73,7 @@ export default function TakeAuditSetupPage() {
                 <SelectValue placeholder={loadingTemplates ? "Loading templates..." : "Choose a template"} />
               </SelectTrigger>
               <SelectContent>
-                {templatesData?.templates.map((t) => (
+                {templatesData?.data.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
                     <div className="flex flex-col items-start">
                       <span className="font-semibold">{t.name}</span>

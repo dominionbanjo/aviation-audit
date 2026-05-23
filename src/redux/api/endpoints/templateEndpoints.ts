@@ -1,12 +1,9 @@
 import { apiSlice } from "../apiSlice";
 import { AuditTemplate, AuditCategory, AuditQuestion } from "@/lib/db/schema";
 import { TemplateWithMeta, CreateTemplatePayload } from "@/lib/services/audit-template.service";
+import { PaginatedResponse } from "@/lib/api/pagination";
 
 // ─── Response Types ────────────────────────────────────────────────────────
-interface TemplatesResponse {
-  templates: TemplateWithMeta[];
-}
-
 interface TemplateDetail {
   id: string;
   name: string;
@@ -34,12 +31,19 @@ interface StatsResponse {
 // ─── Endpoint Injection ───────────────────────────────────────────────────
 export const templateApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getTemplates: builder.query<TemplatesResponse, void>({
-      query: () => "/protected/audit/templates",
+    getTemplates: builder.query<PaginatedResponse<TemplateWithMeta>, { page?: number; limit?: number; search?: string } | void>({
+      query: (params) => ({
+        url: "/protected/audit/templates",
+        params: {
+          page: params?.page ?? 1,
+          limit: params?.limit ?? 10,
+          search: params?.search ?? "",
+        },
+      }),
       providesTags: (result) =>
-        result?.templates
+        result?.data
           ? [
-              ...result.templates.map(({ id }) => ({ type: "Templates" as const, id })),
+              ...result.data.map(({ id }) => ({ type: "Templates" as const, id })),
               { type: "Templates", id: "LIST" },
             ]
           : [{ type: "Templates", id: "LIST" }],
