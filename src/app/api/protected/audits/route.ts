@@ -1,12 +1,14 @@
 import { withAuth } from "@/lib/api/withAuth";
-import { getAudits, startAudit } from "@/lib/services/audit.service";
+import { getAudits, startAudit, getAuditsPaginated } from "@/lib/services/audit.service";
+import { getPaginationParams, getPaginatedResponse } from "@/lib/api/pagination";
 import { NextResponse } from "next/server";
 
 // ─── GET /api/protected/audits ────────────────────────────────────────────────
-export const GET = withAuth(async () => {
+export const GET = withAuth(async (req) => {
   try {
-    const audits = await getAudits();
-    return NextResponse.json({ audits });
+    const { page, limit, offset, search } = getPaginationParams(req.url);
+    const { rows, total } = await getAuditsPaginated({ limit, offset, search });
+    return NextResponse.json(getPaginatedResponse(rows, total, page, limit));
   } catch (err) {
     console.error("[GET /api/protected/audits]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
