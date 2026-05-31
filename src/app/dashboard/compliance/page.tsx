@@ -21,6 +21,7 @@ import { Modal } from "@/components/shared/Modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useGetOtpRecordsQuery, OtpRecord } from "@/redux/api/endpoints/otpEndpoints";
 
@@ -388,11 +389,15 @@ export default function CompliancePage() {
                     </TableHeader>
                     <TableBody>
                       {isLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-xs text-muted-foreground">
-                            Calculating airline performance rankings...
-                          </TableCell>
-                        </TableRow>
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="px-6"><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                            <TableCell className="text-center"><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
+                            <TableCell className="text-center"><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
+                            <TableCell className="text-right px-6"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
                       ) : airlineStandings.length > 0 ? (
                         airlineStandings.map((a, idx) => (
                           <TableRow key={idx} className="hover:bg-muted/10">
@@ -452,11 +457,15 @@ export default function CompliancePage() {
                     </TableHeader>
                     <TableBody>
                       {isLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-xs text-muted-foreground">
-                            Calculating route performance rankings...
-                          </TableCell>
-                        </TableRow>
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="px-6"><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                            <TableCell className="text-center"><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
+                            <TableCell className="text-center"><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
+                            <TableCell className="text-right px-6"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
                       ) : routeStandings.length > 0 ? (
                         routeStandings.map((r, idx) => (
                           <TableRow key={idx} className="hover:bg-muted/10">
@@ -502,7 +511,7 @@ export default function CompliancePage() {
         className="sm:max-w-[700px] overflow-hidden"
       >
         {selectedRecord && (
-          <div className="space-y-6 pt-2 max-h-[80vh] overflow-y-auto pr-2">
+          <div className="space-y-6 pt-2">
             
             {/* Header badges */}
             <div className="flex flex-wrap gap-2 items-center justify-between border-b border-border/50 pb-4">

@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Save2, UserTick, ShieldSecurity, Profile2User } from "iconsax-react";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { toast } from "sonner"; // Assuming sonner is used, if not I'll check toast options
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useGetProfileQuery, useUpdateProfileMutation } from "@/redux/api/endpoints/userEndpoints";
 
@@ -46,6 +47,58 @@ export default function SettingsPage() {
       });
     }
   }, [user, form]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8 pb-20">
+        <PageHeader 
+          title="Terminal Settings" 
+          description="Manage your auditor profile, security preferences, and system configurations." 
+        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="shadow-sm border-border/60">
+              <CardHeader className="border-b bg-muted/20 pb-4">
+                <Skeleton className="h-6 w-1/4" />
+              </CardHeader>
+              <CardContent className="pt-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+                <div className="pt-4 border-t flex justify-end">
+                  <Skeleton className="h-10 w-28" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm border-border/60">
+              <CardHeader className="border-b bg-muted/20 pb-4">
+                <Skeleton className="h-6 w-1/4" />
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                <Skeleton className="h-16 w-full animate-pulse" />
+                <Skeleton className="h-16 w-full animate-pulse" />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="shadow-sm border-border/60">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-6 w-1/3" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: ProfileFormValues) => {
     try {

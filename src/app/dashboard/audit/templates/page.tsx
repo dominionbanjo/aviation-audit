@@ -109,18 +109,13 @@ export default function AuditTemplatesPage() {
 
       {/* Table */}
       <div className="pt-2 flex-grow">
-        {loading ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-md" />
-            ))}
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="text-center py-12 text-destructive text-sm bg-destructive/5 rounded-xl border border-destructive/20">{error}</div>
         ) : (
           <DataTable
             columns={columns}
             data={templates}
+            isLoading={loading}
             searchKey="name"
             searchPlaceholder="Search templates by name..."
             filterKey="locationType"

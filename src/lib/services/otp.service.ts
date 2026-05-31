@@ -62,6 +62,11 @@ export async function submitOtpRecord(payload: InsertOtpRecord): Promise<string>
     .insert(otpRecords)
     .values({
       ...payload,
+      date: new Date(payload.date),
+      scheduledDeparture: schedDep,
+      actualDeparture: actDep,
+      scheduledArrival: new Date(payload.scheduledArrival),
+      actualArrival: new Date(payload.actualArrival),
       delayMinutes: calculatedDelayMinutes,
       wasDelayed,
     })

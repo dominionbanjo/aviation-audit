@@ -45,6 +45,7 @@ export function FormDatePicker({ name, label, placeholder = "Pick a date", class
             <PopoverTrigger asChild>
               <FormControl>
                 <Button
+                  type="button"
                   variant={"outline"}
                   className={cn(
                     "w-full pl-3 text-left font-normal h-10 bg-background border-border flex items-center justify-start",

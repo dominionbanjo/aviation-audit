@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TaskSquare, Location, DirectNotification } from "iconsax-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TakeAuditSetupPage() {
   const router = useRouter();
@@ -68,21 +69,25 @@ export default function TakeAuditSetupPage() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Standard Compliance Template</Label>
-            <Select onValueChange={setSelectedTemplate} value={selectedTemplate}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder={loadingTemplates ? "Loading templates..." : "Choose a template"} />
-              </SelectTrigger>
-              <SelectContent>
-                {templatesData?.data.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-semibold">{t.name}</span>
-                      <span className="text-xs text-muted-foreground uppercase">{t.regulatoryBase} • {t.locationType}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {loadingTemplates ? (
+              <Skeleton className="h-12 w-full rounded-md" />
+            ) : (
+              <Select onValueChange={setSelectedTemplate} value={selectedTemplate}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Choose a template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templatesData?.data.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold">{t.name}</span>
+                        <span className="text-xs text-muted-foreground uppercase">{t.regulatoryBase} • {t.locationType}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-2">

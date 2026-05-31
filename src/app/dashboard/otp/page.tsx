@@ -46,6 +46,7 @@ import { FormSelect } from "@/components/shared/FormSelect";
 import { FormDatePicker } from "@/components/shared/FormDatePicker";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ResponsiveContainer,
   LineChart,
@@ -432,22 +433,30 @@ export default function OTPPage() {
                 </div>
               </CardHeader>
               <CardContent className="h-[300px] pt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={summary?.trend || []}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="otp"
-                      name="OTP %"
-                      stroke="#3b82f6"
-                      strokeWidth={3}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {isSummaryLoading ? (
+                  <div className="h-full w-full flex items-end gap-2 px-8 pb-12">
+                    {[...Array(6)].map((_, i) => (
+                      <Skeleton key={i} className="flex-1 w-full rounded-t-lg bg-muted/40" style={{ height: `${20 + Math.random() * 60}%` }} />
+                    ))}
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={summary?.trend || []}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="otp"
+                        name="OTP %"
+                        stroke="#3b82f6"
+                        strokeWidth={3}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </CardContent>
             </Card>
 
@@ -462,7 +471,12 @@ export default function OTPPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px] flex flex-col justify-center">
-                {delayCategories && delayCategories.length > 0 ? (
+                {isCategoriesLoading ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <Skeleton className="h-[180px] w-[180px] rounded-full bg-muted/40" />
+                    <Skeleton className="h-4 w-24 bg-muted/40" />
+                  </div>
+                ) : delayCategories && delayCategories.length > 0 ? (
                   <ResponsiveContainer width="100%" height="90%">
                     <PieChart>
                       <Pie
@@ -521,11 +535,13 @@ export default function OTPPage() {
                   </TableHeader>
                   <TableBody>
                     {isAirlinesLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={3} className="text-center text-xs py-8 text-muted-foreground">
-                          Loading airline stats...
-                        </TableCell>
-                      </TableRow>
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
                     ) : airlineList.length > 0 ? (
                       airlineList.map((a, i) => (
                         <TableRow key={i} className="hover:bg-muted/10">
@@ -579,11 +595,13 @@ export default function OTPPage() {
                   </TableHeader>
                   <TableBody>
                     {isRoutesLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={3} className="text-center text-xs py-8 text-muted-foreground">
-                          Loading route performance...
-                        </TableCell>
-                      </TableRow>
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell className="text-center"><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
                     ) : routeList.length > 0 ? (
                       routeList.map((r, i) => (
                         <TableRow key={i} className="hover:bg-muted/10">
@@ -1008,6 +1026,7 @@ export default function OTPPage() {
                   
                   {currentStep < 6 ? (
                     <Button
+                      key="next-step-button"
                       type="button"
                       onClick={async () => {
                         const isValid = await validateStep(currentStep);
@@ -1021,6 +1040,7 @@ export default function OTPPage() {
                     </Button>
                   ) : (
                     <Button
+                      key="submit-sop-button"
                       type="submit"
                       disabled={isSubmitting}
                       className="h-10 px-6 bg-primary hover:bg-primary/95 text-primary-foreground font-bold text-xs flex items-center gap-1.5"

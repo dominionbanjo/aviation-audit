@@ -174,7 +174,7 @@ export default function AuditsHistoryPage() {
                 </span>
               </div>
 
-              <div className="divide-y divide-border/50 max-h-[45vh] overflow-y-auto">
+              <div className="divide-y divide-border/50">
                 {auditDetails.template?.categories?.map((cat) => {
                   return (
                     <div key={cat.id} className="p-4 space-y-3">

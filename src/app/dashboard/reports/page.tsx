@@ -21,8 +21,9 @@ import { StatCard } from "@/components/shared/StatCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FormInput } from "@/components/shared/FormInput";
 import { FormSelect } from "@/components/shared/FormSelect";
+import { FormInput } from "@/components/shared/FormInput";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useGetAuditsQuery } from "@/redux/api/endpoints/auditEndpoints";
 import { useGetFindingsQuery } from "@/redux/api/endpoints/findingsEndpoints";
@@ -535,11 +536,15 @@ export default function ReportsPage() {
               </TableHeader>
               <TableBody>
                 {activeReportInfo.loading ? (
-                  <TableRow>
-                    <TableCell colSpan={activeReportInfo.data.length > 0 ? Object.keys(activeReportInfo.data[0]).length : 6} className="text-center py-12 text-xs text-muted-foreground font-mono">
-                      Querying Platform Registry Database...
-                    </TableCell>
-                  </TableRow>
+                  Array.from({ length: 5 }).map((_, rIdx) => (
+                    <TableRow key={rIdx}>
+                      {Array.from({ length: activeReportInfo.data.length > 0 ? Object.keys(activeReportInfo.data[0]).length : 6 }).map((_, cIdx) => (
+                        <TableCell key={cIdx} className="py-4 px-6">
+                          <Skeleton className="h-4 w-full" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
                 ) : activeReportInfo.data.length > 0 ? (
                   activeReportInfo.data.slice(0, 15).map((row, rowIdx) => (
                     <TableRow key={rowIdx} className="hover:bg-muted/10">
