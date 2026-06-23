@@ -1,4 +1,3 @@
-import { getAirlinesList, getRoutesList, getDelayCategoriesList } from "@/lib/services/entity.service";
 import { getAudits } from "@/lib/services/audit.service";
 import { getFindings } from "@/lib/services/findings.service";
 import { getOtpRecordsList } from "@/lib/services/otp.service";

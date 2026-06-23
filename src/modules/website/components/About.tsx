@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
 import { ShieldTick, Global, Note, StatusUp, DocumentCloud, HierarchySquare, Radar, Activity } from "iconsax-react";
 

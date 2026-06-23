@@ -1,5 +1,5 @@
 import { apiSlice } from "../apiSlice";
-import { AuditTemplate, AuditCategory, AuditQuestion } from "@/lib/db/schema";
+import { AuditCategory, AuditQuestion } from "@/lib/db/schema";
 import { TemplateWithMeta, CreateTemplatePayload } from "@/lib/services/audit-template.service";
 import { PaginatedResponse } from "@/lib/api/pagination";
 
@@ -51,7 +51,7 @@ export const templateApi = apiSlice.injectEndpoints({
 
     getTemplate: builder.query<SingleTemplateResponse, string>({
       query: (id) => `/protected/audit/templates/${id}`,
-      providesTags: (result, error, id) => [{ type: "Templates", id }],
+      providesTags: (_result, _error, id) => [{ type: "Templates", id }],
     }),
 
     getStats: builder.query<StatsResponse, void>({
@@ -74,7 +74,7 @@ export const templateApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Templates", id },
         { type: "Templates", id: "LIST" },
       ],
@@ -85,7 +85,7 @@ export const templateApi = apiSlice.injectEndpoints({
         url: `/protected/audit/templates/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: "Templates", id },
         { type: "Templates", id: "LIST" },
         { type: "Stats", id: "GLOBAL" },

@@ -28,15 +28,11 @@ export const loginUser = createAsyncThunk<
     );
   }
 
-  if (!data.user) {
-    // Fetch profile to get user since some auth responses only return session
-    const profileRes = await fetch('/api/protected/user/profile');
-    const profileData = await profileRes.json() as { user?: User; error?: string };
-    if (!profileRes.ok) return rejectWithValue('Login succeeded but profile fetch failed');
-    return profileData.user as User;
-  }
-
-  return data.user;
+  // Always fetch profile to get custom database role and user details
+  const profileRes = await fetch('/api/protected/user/profile');
+  const profileData = await profileRes.json() as { user?: User; error?: string };
+  if (!profileRes.ok) return rejectWithValue('Login succeeded but profile fetch failed');
+  return profileData.user as User;
 });
 
 export const signUpUser = createAsyncThunk<
@@ -59,14 +55,11 @@ export const signUpUser = createAsyncThunk<
     );
   }
 
-  if (!data.user) {
-    const profileRes = await fetch('/api/protected/user/profile');
-    const profileData = await profileRes.json() as { user?: User; error?: string };
-    if (!profileRes.ok) return rejectWithValue('Sign up succeeded but profile fetch failed');
-    return profileData.user as User;
-  }
-
-  return data.user;
+  // Always fetch profile to get custom database role and user details
+  const profileRes = await fetch('/api/protected/user/profile');
+  const profileData = await profileRes.json() as { user?: User; error?: string };
+  if (!profileRes.ok) return rejectWithValue('Sign up succeeded but profile fetch failed');
+  return profileData.user as User;
 });
 
 export const fetchProfile = createAsyncThunk<

@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { 
   FileText, 
   Download, 
   Printer, 
   Search, 
-  Activity, 
   Database, 
   Clock, 
   Calendar,
@@ -30,43 +29,43 @@ import { useGetFindingsQuery } from "@/redux/api/endpoints/findingsEndpoints";
 import { useGetOtpRecordsQuery } from "@/redux/api/endpoints/otpEndpoints";
 
 // Memory-efficient Blob exporter for streaming large datasets to Excel-compatible CSVs
-function exportToCsv(data: any[], filename: string) {
-  if (!data || data.length === 0) return;
+// function exportToCsv(data: any[], filename: string) {
+//   if (!data || data.length === 0) return;
 
-  // Extract columns
-  const headers = Object.keys(data[0]);
+//   // Extract columns
+//   const headers = Object.keys(data[0]);
   
-  // Build CSV string using chunking (streaming-ready)
-  const csvChunks: string[] = [];
-  csvChunks.push(headers.join(","));
+//   // Build CSV string using chunking (streaming-ready)
+//   const csvChunks: string[] = [];
+//   csvChunks.push(headers.join(","));
 
-  for (let i = 0; i < data.length; i++) {
-    const row = data[i];
-    const rowString = headers.map(header => {
-      const val = row[header];
-      if (val === null || val === undefined) return '""';
-      // Escape double quotes by doubling them
-      const cleanVal = String(val).replace(/"/g, '""');
-      return `"${cleanVal}"`;
-    }).join(",");
-    csvChunks.push(rowString);
-  }
+//   for (let i = 0; i < data.length; i++) {
+//     const row = data[i];
+//     const rowString = headers.map(header => {
+//       const val = row[header];
+//       if (val === null || val === undefined) return '""';
+//       // Escape double quotes by doubling them
+//       const cleanVal = String(val).replace(/"/g, '""');
+//       return `"${cleanVal}"`;
+//     }).join(",");
+//     csvChunks.push(rowString);
+//   }
 
-  const csvContent = csvChunks.join("\r\n");
+//   const csvContent = csvChunks.join("\r\n");
   
-  // Include UTF-8 BOM (\ufeff) to make Excel parse the UTF-8 CSV automatically
-  const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+//   // Include UTF-8 BOM (\ufeff) to make Excel parse the UTF-8 CSV automatically
+//   const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+//   const url = URL.createObjectURL(blob);
   
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.style.visibility = "hidden";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url); // Free memory
-}
+//   const link = document.createElement("a");
+//   link.setAttribute("href", url);
+//   link.setAttribute("download", filename);
+//   link.style.visibility = "hidden";
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+//   URL.revokeObjectURL(url); // Free memory
+// }
 
 interface ExportHistoryItem {
   id: string;

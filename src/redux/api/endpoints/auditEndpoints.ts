@@ -2,9 +2,6 @@ import { apiSlice } from "../apiSlice";
 import { AuditRecord } from "@/modules/audits/types";
 
 // ─── Response Types ────────────────────────────────────────────────────────
-interface AuditsResponse {
-  audits: AuditRecord[];
-}
 
 interface AuditStatsResponse {
   stats: {
@@ -76,7 +73,7 @@ export const auditApi = apiSlice.injectEndpoints({
 
     getAudit: builder.query<SingleAuditWithTemplate, string>({
       query: (id) => `/protected/audits/${id}`,
-      providesTags: (result, error, id) => [{ type: "Audits", id }],
+      providesTags: (_result, _error, id) => [{ type: "Audits", id }],
     }),
 
     startAudit: builder.mutation<{ auditId: string }, { templateId: string; location: string }>({
@@ -103,7 +100,7 @@ export const auditApi = apiSlice.injectEndpoints({
         url: `/protected/audits/${id}/complete`,
         method: "PATCH",
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: "Audits", id },
         { type: "Audits", id: "LIST" },
         { type: "Stats", id: "AUDITS" },

@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ColumnDef } from "@tanstack/react-table";
 import { 
   Routing, 
-  Trash, 
-  Edit2, 
   Add, 
-  CloseCircle, 
   TickCircle 
 } from "iconsax-react";
 
@@ -22,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/shared/FormInput";
 import { FormDatePicker } from "@/components/shared/FormDatePicker";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useDebounce } from "@/hooks/useDebounce";
+import { getRouteColumns } from "@/modules/routes/columns";
 
 import { 
   useGetRoutesListQuery,
@@ -48,8 +46,9 @@ export default function RoutesPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
-  const { data, isLoading } = useGetRoutesListQuery({ page, limit, search });
+  const { data, isLoading } = useGetRoutesListQuery({ page, limit, search: debouncedSearch });
   const [createRoute, { isLoading: isCreating }] = useCreateRouteMutation();
   const [updateRoute, { isLoading: isUpdating }] = useUpdateRouteMutation();
   const [deleteRoute] = useDeleteRouteMutation();
@@ -122,71 +121,10 @@ export default function RoutesPage() {
     }
   };
 
-  const columns: ColumnDef<RouteRecord>[] = [
-    {
-      accessorKey: "code",
-      header: "Route Sector",
-      cell: ({ row }) => (
-        <span className="font-mono bg-primary/5 border border-primary/10 px-2.5 py-1 rounded text-xs font-bold text-primary">
-          {row.getValue("code")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "origin",
-      header: "Departure Origin",
-      cell: ({ row }) => (
-        <span className="font-medium text-foreground">{row.getValue("origin")}</span>
-      ),
-    },
-    {
-      accessorKey: "destination",
-      header: "Arrival Destination",
-      cell: ({ row }) => (
-        <span className="font-medium text-slate-800 dark:text-slate-200">{row.getValue("destination")}</span>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Active Since",
-      cell: ({ row }) => {
-        const val = row.getValue("createdAt") as string;
-        return (
-          <span className="text-xs text-muted-foreground">
-            {val ? new Date(val).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            }) : "N/A"}
-          </span>
-        );
-      },
-    },
-    {
-      id: "actions",
-      header: () => <span className="sr-only">Actions</span>,
-      cell: ({ row }) => (
-        <div className="flex justify-end gap-2 pr-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleOpenEditModal(row.original)}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-primary hover:bg-primary/10"
-          >
-            <Edit2 size={16} variant="Outline" color="currentColor" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDeletingRouteId(row.original.id)}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
-          >
-            <Trash size={16} variant="Outline" color="currentColor" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  const columns = getRouteColumns({
+    onEdit: handleOpenEditModal,
+    onDelete: (id) => setDeletingRouteId(id),
+  });
 
   return (
     <div className="space-y-6">

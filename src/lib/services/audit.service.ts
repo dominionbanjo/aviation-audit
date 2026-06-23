@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { audits, auditResponses, auditQuestions } from "@/lib/db/schema";
 import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
 import { auditTemplates, users } from "@/lib/db/schema";
-import type { Audit, AuditResponse, InsertAudit, InsertAuditResponse } from "@/lib/db/schema";
+import type { Audit } from "@/lib/db/schema";
 
 export interface AuditWithMeta extends Audit {
   templateName: string;

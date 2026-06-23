@@ -30,6 +30,7 @@ interface FormSelectProps {
   placeholder?: string
   icon?: React.ReactNode
   loading?: boolean
+  disabled?: boolean
   className?: string
   triggerClassName?: string
 }
@@ -41,6 +42,7 @@ export function FormSelect({
   placeholder, 
   icon,
   loading, 
+  disabled,
   className,
   triggerClassName 
 }: FormSelectProps) {
@@ -57,7 +59,7 @@ export function FormSelect({
             onValueChange={field.onChange} 
             defaultValue={field.value} 
             value={field.value}
-            disabled={loading}
+            disabled={disabled || loading}
           >
             <FormControl>
               <div className="relative">

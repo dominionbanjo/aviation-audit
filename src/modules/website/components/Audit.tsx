@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
-import { TaskSquare, Edit, ClipboardTick, Warning2, ShieldSearch, DocumentCode } from "iconsax-react";
+import { TaskSquare, ClipboardTick, Warning2, ShieldSearch, DocumentCode } from "iconsax-react";
 import { cn } from "@/lib/utils";
 
 export const Audit = () => {

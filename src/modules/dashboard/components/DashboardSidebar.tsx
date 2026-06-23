@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Airplane, ArrowLeft2, ArrowRight2, CloseCircle } from "iconsax-react";
+import { Airplane, CloseCircle, HambergerMenu } from "iconsax-react";
 import { DASHBOARD_MENU_ITEMS } from "../constants/menu-items";
+import { useAppSelector } from "@/redux/hooks";
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
@@ -15,6 +16,8 @@ interface DashboardSidebarProps {
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const user = useAppSelector((state) => state.auth.user);
+  const userRole = user?.role || "USER";
 
   return (
     <>
@@ -36,14 +39,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Collapse Toggle (Desktop Only) */}
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3.5 top-7 bg-white border border-border text-slate-400 rounded-full p-1 z-50 hover:text-primary hover:border-primary transition-all shadow-sm"
-        >
-          {isCollapsed ? <ArrowRight2 size={16} variant="Outline" color="currentColor" /> : <ArrowLeft2 size={16} variant="Outline" color="currentColor" />}
-        </button>
-
         {/* Mobile Close Button */}
         <button 
           onClick={onClose}
@@ -52,18 +47,39 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
           <CloseCircle size={24} variant="Outline" color="currentColor" />
         </button>
 
-        {/* Header / Logo */}
-        <div className={cn("flex items-center h-16 border-b border-border", isCollapsed ? "lg:justify-center px-0" : "px-6")}>
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="bg-primary p-2 rounded-lg text-primary-foreground shadow-lg shadow-primary/20 shrink-0 flex items-center justify-center">
-              <Airplane size={20} variant="Bold" color="currentColor" />
-            </div>
-            {(!isCollapsed || isOpen) && (
-              <span className="font-bold text-xl tracking-tight text-foreground whitespace-nowrap">
-                AQSAMS
-              </span>
+        {/* Header / Logo & Collapse Toggle */}
+        <div className={cn("flex items-center h-16 border-b border-border justify-between px-6", isCollapsed && "lg:justify-center lg:px-0")}>
+          <div className="flex items-center gap-3">
+            {isCollapsed ? (
+              <button
+                onClick={() => setIsCollapsed(false)}
+                className="bg-primary p-2 rounded-lg text-primary-foreground shadow-lg shadow-primary/20 shrink-0 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                title="Expand Sidebar"
+              >
+                <Airplane size={20} variant="Bold" color="currentColor" />
+              </button>
+            ) : (
+              <Link href="/" className="flex items-center gap-3">
+                <div className="bg-primary p-2 rounded-lg text-primary-foreground shadow-lg shadow-primary/20 shrink-0 flex items-center justify-center">
+                  <Airplane size={20} variant="Bold" color="currentColor" />
+                </div>
+                <span className="font-bold text-xl tracking-tight text-foreground whitespace-nowrap">
+                  AQSAMS
+                </span>
+              </Link>
             )}
-          </Link>
+          </div>
+
+          {/* Desktop Collapse Toggle (Hamburger) */}
+          {!isCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(true)}
+              className="hidden lg:flex text-slate-400 hover:text-primary transition-colors cursor-pointer"
+              title="Collapse Sidebar"
+            >
+              <HambergerMenu size={22} variant="Outline" color="currentColor" />
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -74,7 +90,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
             </div>
           )}
           
-          {DASHBOARD_MENU_ITEMS.map((item) => {
+          {DASHBOARD_MENU_ITEMS.filter((item) => item.roles.includes(userRole)).map((item) => {
             const isActive = item.href === "/dashboard" 
               ? pathname === "/dashboard" 
               : pathname.startsWith(item.href);

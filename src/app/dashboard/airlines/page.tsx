@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ColumnDef } from "@tanstack/react-table";
 import { 
   Airplane, 
-  Trash, 
-  Edit2, 
   Add, 
-  CloseCircle, 
   TickCircle 
 } from "iconsax-react";
 
@@ -22,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/shared/FormInput";
 import { FormDatePicker } from "@/components/shared/FormDatePicker";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useDebounce } from "@/hooks/useDebounce";
+import { getAirlineColumns } from "@/modules/airlines/columns";
 
 import { 
   useGetAirlinesListQuery,
@@ -47,8 +45,9 @@ export default function AirlinesPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
-  const { data, isLoading } = useGetAirlinesListQuery({ page, limit, search });
+  const { data, isLoading } = useGetAirlinesListQuery({ page, limit, search: debouncedSearch });
   const [createAirline, { isLoading: isCreating }] = useCreateAirlineMutation();
   const [updateAirline, { isLoading: isUpdating }] = useUpdateAirlineMutation();
   const [deleteAirline] = useDeleteAirlineMutation();
@@ -116,64 +115,10 @@ export default function AirlinesPage() {
     }
   };
 
-  const columns: ColumnDef<AirlineRecord>[] = [
-    {
-      accessorKey: "name",
-      header: "Airline Name",
-      cell: ({ row }) => (
-        <span className="font-bold text-foreground">{row.getValue("name")}</span>
-      ),
-    },
-    {
-      accessorKey: "code",
-      header: "IATA Code",
-      cell: ({ row }) => (
-        <span className="font-mono bg-muted px-2.5 py-1 rounded text-xs font-bold text-primary">
-          {row.getValue("code")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Commenced Operations",
-      cell: ({ row }) => {
-        const val = row.getValue("createdAt") as string;
-        return (
-          <span className="text-xs text-muted-foreground">
-            {val ? new Date(val).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            }) : "N/A"}
-          </span>
-        );
-      },
-    },
-    {
-      id: "actions",
-      header: () => <span className="sr-only">Actions</span>,
-      cell: ({ row }) => (
-        <div className="flex justify-end gap-2 pr-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleOpenEditModal(row.original)}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-primary hover:bg-primary/10"
-          >
-            <Edit2 size={16} variant="Outline" color="currentColor" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDeletingAirlineId(row.original.id)}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
-          >
-            <Trash size={16} variant="Outline" color="currentColor" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  const columns = getAirlineColumns({
+    onEdit: handleOpenEditModal,
+    onDelete: (id) => setDeletingAirlineId(id),
+  });
 
   return (
     <div className="space-y-6">

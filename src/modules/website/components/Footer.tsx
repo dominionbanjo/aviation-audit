@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { NAV_LINKS } from "../constants/menu-items";

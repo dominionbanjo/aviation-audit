@@ -115,7 +115,7 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const { watch, setValue } = methods;
+  const { watch} = methods;
   const filterValue = watch(filterKey || "");
 
   React.useEffect(() => {

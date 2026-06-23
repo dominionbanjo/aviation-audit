@@ -1,5 +1,5 @@
 import { pgTable, uuid, timestamp, text, integer, varchar, index } from "drizzle-orm/pg-core";
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import { users } from "./users";
 
 // ─── Audit Templates ────────────────────────────────────────────────────────
@@ -11,6 +11,10 @@ export const auditTemplates = pgTable("audit_templates", {
   createdBy: varchar("created_by").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    nameIdx: index("idx_templates_name").on(table.name),
+  };
 });
 
 

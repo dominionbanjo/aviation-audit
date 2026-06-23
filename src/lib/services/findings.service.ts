@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { audits, auditResponses, auditQuestions, auditCategories, auditTemplates, users } from "@/lib/db/schema";
 import { eq, sql, and, desc, or, ilike } from "drizzle-orm";
-import type { AuditResponse } from "@/lib/db/schema";
 
 export interface RichFinding {
   id: string;

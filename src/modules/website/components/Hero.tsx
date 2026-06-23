@@ -1,16 +1,13 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { 
-  AirplaneSquare, 
   ShieldTick, 
   Chart, 
   DocumentText, 
   Radar, 
   Global,
-  Notification,
   Cpu,
   Task,
   Activity

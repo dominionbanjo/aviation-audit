@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/api/withAuth";
-import { getOtpRecordsList, getOtpRecordsListPaginated } from "@/lib/services/otp.service";
+import {  getOtpRecordsListPaginated } from "@/lib/services/otp.service";
 import { getPaginationParams, getPaginatedResponse } from "@/lib/api/pagination";
 import { NextResponse } from "next/server";
 

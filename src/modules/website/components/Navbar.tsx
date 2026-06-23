@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -162,11 +162,8 @@ export const Navbar = () => {
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Button variant="ghost" className="rounded-full px-5" asChild>
+              <Button className="rounded-full px-6 shadow-md shadow-primary/10 font-bold bg-primary hover:bg-primary/95" asChild>
                 <Link href="/auth/sign-in">Login</Link>
-              </Button>
-              <Button className="rounded-full px-5" asChild>
-                <Link href="/auth/sign-up">Sign Up</Link>
               </Button>
             </div>
           )}
@@ -250,14 +247,9 @@ export const Navbar = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 border-t pt-4">
-                  <Button variant="outline" className="w-full rounded-xl" asChild>
+                  <Button className="w-full rounded-xl" asChild>
                     <Link href="/auth/sign-in" onClick={() => setMobileMenuOpen(false)}>
                       Login
-                    </Link>
-                  </Button>
-                  <Button className="w-full rounded-xl" asChild>
-                    <Link href="/auth/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                      Sign Up
                     </Link>
                   </Button>
                 </div>

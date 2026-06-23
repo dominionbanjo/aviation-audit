@@ -1,5 +1,5 @@
 import { pgTable, varchar, timestamp, text, uniqueIndex, uuid, index } from "drizzle-orm/pg-core";
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import { users } from "./users";
 import { auditTemplates } from "./audit-templates";
 import { auditQuestions } from "./audit-templates";
@@ -24,6 +24,7 @@ export const audits = pgTable("audits", {
     startedAtIdx: index("idx_audits_started_at").on(table.startedAt),
     statusIdx: index("idx_audits_status").on(table.status),
     templateIdIdx: index("idx_audits_template_id").on(table.templateId),
+    locationIdx: index("idx_audits_location").on(table.location),
   };
 });
 
@@ -54,6 +55,7 @@ export const auditResponses = pgTable("audit_responses", {
     auditIdIdx: index("idx_responses_audit_id").on(table.auditId),
     questionIdIdx: index("idx_responses_question_id").on(table.questionId),
     valueIdx: index("idx_responses_value").on(table.responseValue),
+    findingStatusIdx: index("idx_responses_finding_status").on(table.findingStatus),
   };
 });
 

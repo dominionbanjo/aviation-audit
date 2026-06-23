@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect } from 'react';
+import  { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +10,6 @@ import { FormInput } from '@/components/shared/FormInput';
 import { Button } from '@/components/ui/button';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { loginUser, clearError } from '@/redux/slices/authSlice';
-import Link from 'next/link';
 import { Sms, Lock1, ShieldTick, DocumentText, Activity } from 'iconsax-react';
 import { motion } from 'framer-motion';
 import { PageLoading } from '@/components/shared/PageLoading';
@@ -167,16 +166,6 @@ function SignInForm() {
             </form>
           </Form>
 
-          <div className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/sign-up" className="font-semibold text-foreground hover:underline underline-offset-4">
-              Create account
-            </Link>
-          </div>
-
-          <div className="text-center text-xs text-muted-foreground/50 font-mono">
-            ● SECURE CONNECTION // TLS_1.3
-          </div>
         </motion.div>
       </div>
     </div>

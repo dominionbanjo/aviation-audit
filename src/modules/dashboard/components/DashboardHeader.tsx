@@ -7,7 +7,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logout, Setting2, User, Notification, HambergerMenu } from "iconsax-react";
-import { cn } from "@/lib/utils";
 import { DASHBOARD_MENU_ITEMS } from "../constants/menu-items";
 
 interface DashboardHeaderProps {
@@ -66,7 +65,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSideba
         </button>
 
         <h2 className="text-xs sm:text-sm font-mono font-semibold tracking-tighter text-muted-foreground uppercase truncate max-w-[150px] sm:max-w-none">
-          Terminal <span className="mx-1 text-border">/</span> 
           <span className="text-foreground">{pageTitle}</span>
         </h2>
       </div>

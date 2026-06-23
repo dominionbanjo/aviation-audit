@@ -1,14 +1,12 @@
-export const NAV_LINKS = [
-  { label: "About", href: "#about" },
-  {
-    label: "Documents",
-    href: "#documents",
-    children: [
-      { label: "Nig. CARs", href: "#nig-cars" },
-      { label: "ICAO Annexes", href: "#icao-annexes" },
-      { label: "Company Manuals (MPM, MCM, SMS, QAM)", href: "#manuals" },
-    ],
-  },
-  { label: "Audit", href: "#audit" },
-  { label: "OTP", href: "#otp" },
+export interface NavLink {
+  label: string;
+  href: string;
+  children?: { label: string; href: string }[];
+}
+
+export const NAV_LINKS: NavLink[] = [
+  { label: "About", href: "/#about" },
+  { label: "Documents", href: "/documents" },
+  { label: "Audit", href: "/#audit" },
+  { label: "OTP", href: "/#otp" },
 ];

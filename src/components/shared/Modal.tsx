@@ -31,16 +31,19 @@ export function Modal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
-        className={cn("sm:max-w-[425px] overflow-hidden", className)}
+        className={cn("sm:max-w-[425px] overflow-hidden p-0 gap-0", className)}
         aria-describedby={undefined}
       >
         {(title || description) && (
-          <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/20">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/50 bg-muted/20 pr-12">
             {title && <DialogTitle className="text-xl font-bold">{title}</DialogTitle>}
-            {description && <DialogDescription>{description}</DialogDescription>}
+            {description && <DialogDescription className="text-xs text-muted-foreground mt-1">{description}</DialogDescription>}
           </DialogHeader>
         )}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
+        <div className={cn("px-6 max-h-[70vh] overflow-y-auto", 
+          (title || description) ? "pt-5" : "pt-6",
+          footer ? "pb-5" : "pb-6"
+        )}>
           {children}
         </div>
         {footer && (

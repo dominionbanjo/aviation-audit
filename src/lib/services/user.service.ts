@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or, ilike, sql } from "drizzle-orm";
 import type { User, InsertUser } from "@/lib/db/schema";
 
 // ─── Upsert ───────────────────────────────────────────────────────────────────
@@ -57,4 +57,43 @@ export async function updateUser(id: string, payload: Partial<Omit<User, "id" | 
     .returning();
 
   return result[0];
+}
+
+// ─── List All Users ──────────────────────────────────────────────────────────
+export async function getAllUsers(options?: { limit?: number; offset?: number; search?: string }): Promise<{ rows: User[]; total: number }> {
+  let query = db.select().from(users).$dynamic();
+  let countQuery = db.select({ count: sql<number>`count(*)` }).from(users).$dynamic();
+
+  if (options?.search) {
+    const searchPattern = `%${options.search}%`;
+    console.log("[user.service.ts] getAllUsers - searchPattern:", searchPattern);
+    query = query.where(
+      or(
+        ilike(users.name, searchPattern),
+        ilike(users.email, searchPattern)
+      )
+    );
+    countQuery = countQuery.where(
+      or(
+        ilike(users.name, searchPattern),
+        ilike(users.email, searchPattern)
+      )
+    );
+  }
+
+  const [{ count }] = await countQuery;
+
+  if (options?.limit !== undefined && options?.offset !== undefined) {
+    query = query.limit(options.limit).offset(options.offset);
+  }
+
+  const rows = await query.orderBy(users.createdAt);
+  return { rows, total: Number(count || 0) };
+}
+
+// ─── Delete User ──────────────────────────────────────────────────────────────
+export async function deleteUser(id: string): Promise<void> {
+  await db
+    .delete(users)
+    .where(eq(users.id, id));
 }

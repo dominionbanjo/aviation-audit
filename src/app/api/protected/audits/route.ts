@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/api/withAuth";
-import { getAudits, startAudit, getAuditsPaginated } from "@/lib/services/audit.service";
+import { startAudit, getAuditsPaginated } from "@/lib/services/audit.service";
 import { getPaginationParams, getPaginatedResponse } from "@/lib/api/pagination";
 import { NextResponse } from "next/server";
 

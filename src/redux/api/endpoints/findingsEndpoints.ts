@@ -71,7 +71,7 @@ export const findingsApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Findings", id },
         { type: "Findings", id: "LIST" },
         { type: "Findings", id: "STATS" },

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { otpRecords } from "@/lib/db/schema";
-import { eq, sql, and, desc, asc, or, ilike } from "drizzle-orm";
+import { eq, sql, desc, asc, or, ilike } from "drizzle-orm";
 import type { InsertOtpRecord, OtpRecord } from "@/lib/db/schema";
 
 export async function getOtpRecordsListPaginated(options: { limit: number; offset: number; search?: string }): Promise<{ rows: OtpRecord[]; total: number }> {

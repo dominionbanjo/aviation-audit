@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/server";
 import { NextRequest, NextResponse } from "next/server";
+import { findUserById, upsertUser } from "@/lib/services/user.service";
 
 // ─── Authenticated Session Context ───────────────────────────────────────────
 // Passed to every wrapped handler so handlers can access the user without
@@ -8,6 +9,7 @@ export interface AuthContext {
   userId: string;
   userEmail: string;
   userName: string | null;
+  role: string;
 }
 
 type AuthedHandler<TParams = Record<string, string>> = (
@@ -37,10 +39,22 @@ export function withAuth<TParams = Record<string, string>>(
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
+      // Fetch user role from database
+      let dbUser = await findUserById(data.user.id);
+      if (!dbUser) {
+        // If authenticated but not in database yet, upsert them with default USER role
+        dbUser = await upsertUser({
+          id: data.user.id,
+          email: data.user.email ?? `user-${data.user.id}@aqsams.local`,
+          name: data.user.name ?? "",
+        });
+      }
+
       const ctx: AuthContext = {
         userId: data.user.id,
         userEmail: data.user.email ?? `user-${data.user.id}@aqsams.local`,
         userName: data.user.name ?? null,
+        role: dbUser.role ?? "USER",
       };
 
       return handler(req, ctx, context);

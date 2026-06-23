@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Timer, ArrowLeft, Logout } from "iconsax-react";
+import { Timer, ArrowLeft } from "iconsax-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";

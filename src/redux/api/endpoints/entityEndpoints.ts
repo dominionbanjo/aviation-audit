@@ -68,7 +68,7 @@ export const entityApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Airlines", id },
         { type: "Airlines", id: "LIST" },
       ],
@@ -112,7 +112,7 @@ export const entityApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Routes", id },
         { type: "Routes", id: "LIST" },
       ],
@@ -156,7 +156,7 @@ export const entityApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "DelayCategories", id },
         { type: "DelayCategories", id: "LIST" },
       ],

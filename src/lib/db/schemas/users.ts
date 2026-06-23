@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const userRoleEnum = pgEnum("user_role", [
@@ -18,6 +18,11 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").default("USER"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    emailIdx: index("idx_users_email").on(table.email),
+    nameIdx: index("idx_users_name").on(table.name),
+  };
 });
 
 export type User = typeof users.$inferSelect;

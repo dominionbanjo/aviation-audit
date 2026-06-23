@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/api/withAuth";
-import { getFindings, getFindingsPaginated } from "@/lib/services/findings.service";
+import {  getFindingsPaginated } from "@/lib/services/findings.service";
 import { getPaginationParams, getPaginatedResponse } from "@/lib/api/pagination";
 import { NextResponse } from "next/server";
 

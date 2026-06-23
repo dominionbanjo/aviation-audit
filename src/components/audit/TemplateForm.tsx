@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -258,7 +258,7 @@ export function TemplateForm({ mode, initialData }: TemplateFormProps) {
               <p>No categories yet. Click <strong className="text-foreground">"Add Category Group"</strong> to start.</p>
             </div>
           ) : (
-            categories.map((cat, ci) => (
+            categories.map((cat, _ci) => (
               <Card key={cat.localId} className="shadow-sm overflow-hidden border-border hover:border-primary/20 transition-all">
                 <CardHeader className="bg-muted/50 border-b py-3 px-5 flex flex-row items-center justify-between">
                   <Input

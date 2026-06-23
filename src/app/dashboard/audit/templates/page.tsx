@@ -1,25 +1,22 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
+import { useState } from "react";
 import { DataTable } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { Button } from "@/components/ui/button";
-import { AddCircle, DocumentText, Setting4, SearchNormal1, Edit2, Eye, Trash } from "iconsax-react";
+import { AddCircle, DocumentText, Setting4, SearchNormal1} from "iconsax-react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TemplateViewModal } from "@/components/audit/TemplateViewModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { toast } from "sonner"; // Using toast directly if registered, otherwise console.log as fallback
+import { toast } from "sonner"; 
+import { useDebounce } from "@/hooks/useDebounce";
 
 import { 
   useGetTemplatesQuery, 
   useGetStatsQuery, 
   useDeleteTemplateMutation 
 } from "@/redux/api/endpoints/templateEndpoints";
-import { TemplateWithMeta } from "@/lib/services/audit-template.service";
 import { getTemplateColumns } from "@/modules/audit-templates/columns";
 
 export default function AuditTemplatesPage() {
@@ -29,12 +26,13 @@ export default function AuditTemplatesPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
   
   // RTK Query Hooks
   const { data: templatesData, isLoading: loading, error: templatesError } = useGetTemplatesQuery({
     page,
     limit,
-    search,
+    search: debouncedSearch,
   });
   const { data: statsData, isLoading: statsLoading } = useGetStatsQuery();
   const [deleteTemplate, { isLoading: isDeleting }] = useDeleteTemplateMutation();

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Edit2, Eye, Trash } from "iconsax-react";

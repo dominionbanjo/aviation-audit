@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { 
   Slider, 
-  Trash, 
-  Edit2, 
   Add, 
   ArrowLeft,
   TickCircle 
@@ -22,8 +19,10 @@ import { Modal } from "@/components/shared/Modal";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/shared/FormInput";
 import { Textarea } from "@/components/ui/textarea";
+import { getDelayCategoryColumns } from "@/modules/otp/delay-categories-columns";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useDebounce } from "@/hooks/useDebounce";
 
 import { 
   useGetDelayCategoriesListQuery,
@@ -50,8 +49,9 @@ export default function DelayCategoriesPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
-  const { data, isLoading } = useGetDelayCategoriesListQuery({ page, limit, search });
+  const { data, isLoading } = useGetDelayCategoriesListQuery({ page, limit, search: debouncedSearch });
   const [createCategory, { isLoading: isCreating }] = useCreateDelayCategoryMutation();
   const [updateCategory, { isLoading: isUpdating }] = useUpdateDelayCategoryMutation();
   const [deleteCategory] = useDeleteDelayCategoryMutation();
@@ -121,57 +121,10 @@ export default function DelayCategoriesPage() {
     }
   };
 
-  const columns: ColumnDef<DelayCategoryRecord>[] = [
-    {
-      accessorKey: "code",
-      header: "IATA Delay Code",
-      cell: ({ row }) => (
-        <span className="font-mono bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded text-xs font-bold text-amber-600">
-          {row.getValue("code")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "name",
-      header: "Category Name",
-      cell: ({ row }) => (
-        <span className="font-bold text-foreground">{row.getValue("name")}</span>
-      ),
-    },
-    {
-      accessorKey: "description",
-      header: "Description / Flight Impact",
-      cell: ({ row }) => (
-        <span className="text-xs text-muted-foreground line-clamp-1">
-          {row.getValue("description") || "No detailed description provided"}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <span className="sr-only">Actions</span>,
-      cell: ({ row }) => (
-        <div className="flex justify-end gap-2 pr-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleOpenEditModal(row.original)}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-primary hover:bg-primary/10"
-          >
-            <Edit2 size={16} variant="Outline" color="currentColor" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDeletingCategoryId(row.original.id)}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
-          >
-            <Trash size={16} variant="Outline" color="currentColor" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  const columns = getDelayCategoryColumns({
+    onEdit: handleOpenEditModal,
+    onDelete: (id) => setDeletingCategoryId(id),
+  });
 
   return (
     <div className="space-y-6">

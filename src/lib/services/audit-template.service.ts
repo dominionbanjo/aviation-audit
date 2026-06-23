@@ -8,9 +8,6 @@ import {
 import { eq, desc, sql, ilike } from "drizzle-orm";
 import type {
   AuditTemplate,
-  InsertAuditTemplate,
-  AuditCategory,
-  AuditQuestion,
 } from "@/lib/db/schema";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

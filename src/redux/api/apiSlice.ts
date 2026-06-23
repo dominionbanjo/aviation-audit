@@ -22,7 +22,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  keepUnusedDataFor: 60, // Standardize caching time to 60 seconds
-  tagTypes: ["Templates", "Stats", "Profile", "Audits", "Otp", "Findings", "Airlines", "Routes", "DelayCategories"],
+  keepUnusedDataFor: 240, // Standardize caching time to 240 seconds
+  tagTypes: ["Templates", "Stats", "Profile", "Audits", "Otp", "Findings", "Airlines", "Routes", "DelayCategories", "Users"],
   endpoints: () => ({}), // Endpoints will be injected from modular files
 });

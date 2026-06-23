@@ -17,8 +17,8 @@ export const GET = withAuth(async (_req, { userId, userEmail, userName }) => {
 export const PATCH = withAuth(async (req, { userId }) => {
   try {
     const body = await req.json();
-    const { name, role } = body;
-    const user = await updateUser(userId, { name, role });
+    const { name } = body; // Only name can be updated by the user themselves
+    const user = await updateUser(userId, { name });
     return NextResponse.json({ user });
   } catch (err) {
     console.error("[PATCH /api/protected/user/profile]", err);

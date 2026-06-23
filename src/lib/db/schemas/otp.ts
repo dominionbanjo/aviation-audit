@@ -17,6 +17,11 @@ export const routes = pgTable("routes", {
   destination: varchar("destination", { length: 50 }).notNull(), // e.g. Abuja (ABV)
   code: varchar("code", { length: 20 }).notNull().unique(), // e.g. LOS-ABV
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    originIdx: index("idx_routes_origin").on(table.origin),
+    destinationIdx: index("idx_routes_destination").on(table.destination),
+  };
 });
 
 // ─── Delay Categories Entity ────────────────────────────────────────────────
@@ -26,6 +31,10 @@ export const delayCategories = pgTable("delay_categories", {
   name: varchar("name").notNull(), // e.g. Passenger Handling, Maintenance
   description: text("description"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    nameIdx: index("idx_delay_categories_name").on(table.name),
+  };
 });
 
 // ─── Submitted OTP Records ──────────────────────────────────────────────────
@@ -77,6 +86,7 @@ export const otpRecords = pgTable("otp_records", {
     routeIdx: index("idx_otp_route").on(table.route),
     delayCodeIdx: index("idx_otp_delay_code").on(table.delayCode),
     wasDelayedIdx: index("idx_otp_was_delayed").on(table.wasDelayed),
+    flightNumberIdx: index("idx_otp_flight_number").on(table.flightNumber),
   };
 });
 

@@ -1,9 +1,12 @@
 import { withAuth } from "@/lib/api/withAuth";
 import { updateTemplate, deleteTemplate, getTemplateById } from "@/lib/services/audit-template.service";
+import { requireAuditor } from "@/lib/api/rbac";
 import { NextResponse } from "next/server";
 
 // ─── GET /api/protected/audit/templates/[id] ─────────────────────────────────
-export const GET = withAuth(async (_req, _ctx, routeParams) => {
+export const GET = withAuth(async (_req, ctx, routeParams) => {
+  const isDenied = requireAuditor(ctx);
+  if (isDenied) return isDenied;
   try {
     const { id } = await routeParams!.params;
     const template = await getTemplateById(id);
@@ -20,7 +23,9 @@ export const GET = withAuth(async (_req, _ctx, routeParams) => {
 });
 
 // ─── PATCH /api/protected/audit/templates/[id] ────────────────────────────────
-export const PATCH = withAuth(async (req, _ctx, routeParams) => {
+export const PATCH = withAuth(async (req, ctx, routeParams) => {
+  const isDenied = requireAuditor(ctx);
+  if (isDenied) return isDenied;
   try {
     const { id } = await routeParams!.params;
     const body = await req.json();
@@ -33,7 +38,9 @@ export const PATCH = withAuth(async (req, _ctx, routeParams) => {
 });
 
 // ─── DELETE /api/protected/audit/templates/[id] ───────────────────────────────
-export const DELETE = withAuth(async (_req, _ctx, routeParams) => {
+export const DELETE = withAuth(async (_req, ctx, routeParams) => {
+  const isDenied = requireAuditor(ctx);
+  if (isDenied) return isDenied;
   try {
     const { id } = await routeParams!.params;
     await deleteTemplate(id);

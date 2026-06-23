@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Modal } from "./Modal";
 import { Button } from "@/components/ui/button";
 import { Warning2 } from "iconsax-react";

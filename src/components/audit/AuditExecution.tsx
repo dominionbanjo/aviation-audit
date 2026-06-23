@@ -24,16 +24,10 @@ import {
 } from "iconsax-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { z } from "zod";
 
 interface AuditExecutionProps {
   auditId: string;
 }
-
-const responseSchema = z.object({
-  responseValue: z.enum(["SAT", "UNSAT", "N/A"]),
-  comment: z.string().optional(),
-});
 
 type ResponseValue = "SAT" | "UNSAT" | "N/A";
 

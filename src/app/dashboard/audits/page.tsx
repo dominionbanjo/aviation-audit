@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { DocumentText, TickCircle, TaskSquare, AddCircle, PlayCircle, StopCircle, Discover } from "iconsax-react";
+import { useState } from "react";
+import { DocumentText, TickCircle, TaskSquare, PlayCircle } from "iconsax-react";
 import { StatCard } from "@/components/shared/StatCard";
 import { DataTable } from "@/components/shared/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/shared/Modal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebounce } from "@/hooks/useDebounce";
 
-import { AuditRecord } from "@/modules/audits/types";
 import { getAuditColumns } from "@/modules/audits/columns";
 
 import { 
@@ -29,8 +28,9 @@ export default function AuditsHistoryPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
-  const { data: auditsData, isLoading } = useGetAuditsQuery({ page, limit, search });
+  const { data: auditsData, isLoading } = useGetAuditsQuery({ page, limit, search: debouncedSearch });
   const { data: statsData, isLoading: statsLoading } = useGetAuditStatsQuery();
   
   // Fetch detailed audit report data (skipped when no audit selected)

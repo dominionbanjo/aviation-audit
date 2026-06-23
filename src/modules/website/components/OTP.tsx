@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
-import { Timer1, ChartSuccess, Activity, Flash, TrendUp, Radar } from "iconsax-react";
+import { Timer1, ChartSuccess, Radar } from "iconsax-react";
 import { cn } from "@/lib/utils";
 
 export const OTP = () => {
