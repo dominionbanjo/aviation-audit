@@ -26,6 +26,11 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -111,7 +116,13 @@ export const Navbar = () => {
           </NavigationMenu>
 
           {/* Auth Section */}
-          {isLoading ? (
+          {!mounted ? (
+            <div className="flex items-center gap-3">
+              <Button className="rounded-full px-6 shadow-md shadow-primary/10 font-bold bg-primary hover:bg-primary/95" asChild>
+                <Link href="/auth/sign-in">Login</Link>
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="h-9 w-24 rounded-full bg-muted animate-pulse" />
           ) : isAuthenticated && user ? (
             <div className="relative">

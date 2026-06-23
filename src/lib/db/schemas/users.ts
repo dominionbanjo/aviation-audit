@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, pgEnum, index, boolean } from "drizzle-orm/pg-core";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const userRoleEnum = pgEnum("user_role", [
@@ -16,6 +16,7 @@ export const users = pgTable("users", {
   email: varchar("email").notNull(),
   name: varchar("name"),
   role: userRoleEnum("role").default("USER"),
+  banned: boolean("banned").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => {

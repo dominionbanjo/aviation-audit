@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { StoreProvider } from "@/redux/StoreProvider";
 import { AuthInit } from "@/components/shared/AuthInit";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -43,6 +44,7 @@ export default function RootLayout({
         <StoreProvider>
           <AuthInit />
           {children}
+          <Toaster richColors position="top-right" />
         </StoreProvider>
       </body>
     </html>

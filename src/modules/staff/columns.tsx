@@ -55,7 +55,14 @@ export const getStaffColumns = (actions: ColumnActions): ColumnDef<User>[] => [
             {(user.name || user.email || "?").charAt(0).toUpperCase()}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-semibold text-foreground truncate">{user.name || "Unnamed Staff"}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-foreground truncate">{user.name || "Unnamed Staff"}</span>
+              {user.banned && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-700 border border-red-200/60">
+                  Revoked
+                </span>
+              )}
+            </div>
             <span className="text-xs text-muted-foreground font-mono truncate">{user.email}</span>
           </div>
         </div>
@@ -97,29 +104,33 @@ export const getStaffColumns = (actions: ColumnActions): ColumnDef<User>[] => [
       const user = row.original;
       return (
         <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Edit Role"
-            onClick={() => {
-              actions.onEdit({ id: user.id, name: user.name || "", role: user.role || "USER" });
-            }}
-            className="h-8.5 w-8.5 p-0 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
-          >
-            <Edit2 size={16} variant="Outline" color="currentColor" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Delete Auditor"
-            onClick={() => {
-              actions.onEdit({ id: user.id, name: user.name || "", role: user.role || "USER" });
-              actions.onDelete({ id: user.id, name: user.name || "", role: user.role || "USER" });
-            }}
-            className="h-8.5 w-8.5 p-0 hover:bg-red-50 hover:text-red-600 text-slate-400 cursor-pointer"
-          >
-            <Trash size={16} variant="Outline" color="currentColor" />
-          </Button>
+          {!user.banned && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Edit Role"
+                onClick={() => {
+                  actions.onEdit({ id: user.id, name: user.name || "", role: user.role || "USER" });
+                }}
+                className="h-8.5 w-8.5 p-0 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              >
+                <Edit2 size={16} variant="Outline" color="currentColor" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Revoke Access"
+                onClick={() => {
+                  actions.onEdit({ id: user.id, name: user.name || "", role: user.role || "USER" });
+                  actions.onDelete({ id: user.id, name: user.name || "", role: user.role || "USER" });
+                }}
+                className="h-8.5 w-8.5 p-0 hover:bg-red-50 hover:text-red-600 text-slate-400 cursor-pointer"
+              >
+                <Trash size={16} variant="Outline" color="currentColor" />
+              </Button>
+            </>
+          )}
         </div>
       );
     },

@@ -1,6 +1,6 @@
 import { withAuth } from "@/lib/api/withAuth";
 import { requireRoles } from "@/lib/api/rbac";
-import { updateUser, deleteUser } from "@/lib/services/user.service";
+import { updateUser } from "@/lib/services/user.service";
 import { NextResponse } from "next/server";
 
 // ─── PATCH /api/protected/admin/users/[id] ───────────────────────────────────
@@ -29,7 +29,7 @@ export const PATCH = withAuth(async (req, ctx, routeParams) => {
 });
 
 // ─── DELETE /api/protected/admin/users/[id] ───────────────────────────────────
-// Delete a user (Admins only)
+// Revoke user access / deactivate user (Admins only)
 export const DELETE = withAuth(async (_req, ctx, routeParams) => {
   const isDenied = requireRoles(ctx, ["ADMIN"]);
   if (isDenied) return isDenied;
@@ -37,13 +37,13 @@ export const DELETE = withAuth(async (_req, ctx, routeParams) => {
   try {
     const { id } = await routeParams!.params;
     
-    // Prevent self-deletion
+    // Prevent self-deactivation
     if (ctx.userId === id) {
-      return NextResponse.json({ error: "You cannot delete your own admin account." }, { status: 400 });
+      return NextResponse.json({ error: "You cannot revoke access for your own admin account." }, { status: 400 });
     }
 
-    await deleteUser(id);
-    return NextResponse.json({ message: "User deleted successfully." });
+    await updateUser(id, { banned: true });
+    return NextResponse.json({ message: "User access revoked successfully." });
   } catch (err) {
     console.error("[DELETE /api/protected/admin/users/[id]]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

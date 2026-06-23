@@ -50,6 +50,10 @@ export function withAuth<TParams = Record<string, string>>(
         });
       }
 
+      if (dbUser.banned) {
+        return NextResponse.json({ error: "Your account has been deactivated." }, { status: 403 });
+      }
+
       const ctx: AuthContext = {
         userId: data.user.id,
         userEmail: data.user.email ?? `user-${data.user.id}@aqsams.local`,

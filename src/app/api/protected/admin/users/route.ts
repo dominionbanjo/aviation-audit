@@ -2,6 +2,7 @@ import { withAuth } from "@/lib/api/withAuth";
 import { requireRoles } from "@/lib/api/rbac";
 import { getAllUsers, upsertUser } from "@/lib/services/user.service";
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth/server";
 
 import { getPaginationParams } from "@/lib/api/pagination";
 
@@ -13,7 +14,6 @@ export const GET = withAuth(async (req, ctx) => {
 
   try {
     const { page, limit, offset, search } = getPaginationParams(req.url);
-    console.log("[GET /api/protected/admin/users] Params parsed:", { page, limit, offset, search, url: req.url });
     const { rows, total } = await getAllUsers({ limit, offset, search });
     
     // We construct pagination metadata
@@ -65,10 +65,15 @@ export const POST = withAuth(async (req, ctx) => {
       return NextResponse.json({ error: "Authentication system not configured." }, { status: 500 });
     }
 
+    const origin = req.headers.get("origin") || new URL(req.url).origin;
+
     // Register user via Neon Auth backend
     const authRes = await fetch(`${baseUrl}/sign-up/email`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Origin": origin
+      },
       body: JSON.stringify({ name, email, password }),
     });
 
@@ -94,6 +99,16 @@ export const POST = withAuth(async (req, ctx) => {
       name: authUser.name,
       role: role as any,
     });
+
+    // Send verification / welcome email using the configured Neon SMTP provider
+    try {
+      await auth.sendVerificationEmail({
+        email: authUser.email,
+        callbackURL: `${origin}/dashboard`,
+      });
+    } catch (emailErr) {
+      console.error("[POST /api/protected/admin/users] Welcome email sending failed:", emailErr);
+    }
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (err) {

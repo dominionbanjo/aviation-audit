@@ -1,6 +1,6 @@
 'use client';
 
-import  { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +13,8 @@ import { loginUser, clearError } from '@/redux/slices/authSlice';
 import { Sms, Lock1, ShieldTick, DocumentText, Activity } from 'iconsax-react';
 import { motion } from 'framer-motion';
 import { PageLoading } from '@/components/shared/PageLoading';
+import { authClient } from '@/lib/auth/client';
+import { toast } from 'sonner';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -21,11 +23,21 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Enter a valid email address'),
+});
+
+type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { isLoading, error, isAuthenticated } = useAppSelector((s) => s.auth);
+
+  // Toggle state between Sign In and Forgot Password
+  const [isForgot, setIsForgot] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   // Decode the redirect param (URL to send user back to after login)
   const redirectTo = searchParams.get('redirect')
@@ -35,6 +47,11 @@ function SignInForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
+  });
+
+  const forgotForm = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '' },
   });
 
   // Once authenticated, redirect to intended destination
@@ -47,8 +64,46 @@ function SignInForm() {
     return () => sub.unsubscribe();
   }, [form, error, dispatch]);
 
-  const onSubmit = (values: FormValues) => {
-    dispatch(loginUser(values));
+  const onSubmit = async (values: FormValues) => {
+    try {
+      await dispatch(loginUser(values)).unwrap();
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      if (err && (err.code === "EMAIL_NOT_VERIFIED" || err.message?.includes("Email not verified") || err.error?.includes("Email not verified"))) {
+        try {
+          await authClient.sendVerificationEmail({
+            email: values.email,
+            callbackURL: `${window.location.origin}/dashboard`
+          });
+          toast.success("Verification link sent to your email!");
+        } catch (emailErr) {
+          console.error("Failed to send verification email:", emailErr);
+        }
+        router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
+      }
+    }
+  };
+
+  const onForgotSubmit = async (values: ForgotPasswordValues) => {
+    setIsSendingReset(true);
+    try {
+      const { error: resetError } = await authClient.requestPasswordReset({
+        email: values.email,
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (resetError) {
+        toast.error(resetError.message || "Failed to send reset link.");
+      } else {
+        toast.success("Secure password reset token sent to your email!");
+        setIsForgot(false);
+        forgotForm.reset();
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to request password reset.");
+    } finally {
+      setIsSendingReset(false);
+    }
   };
 
   return (
@@ -107,65 +162,128 @@ function SignInForm() {
           transition={{ duration: 0.5, ease: 'circOut' }}
           className="w-full max-w-md space-y-8"
         >
-          {/* Header */}
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Access Terminal</h1>
-            <p className="text-sm text-muted-foreground">
-              Sign in to your AQSAMS account to continue.
-            </p>
-          </div>
+          {isForgot ? (
+            <>
+              {/* Forgot Password Header */}
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tight">Recover Credentials</h1>
+                <p className="text-sm text-muted-foreground">
+                  Enter your email to receive a secure token to reset your password.
+                </p>
+              </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              <FormInput
-                name="email"
-                label="Email Address"
-                type="email"
-                placeholder="auditor@airline.ng"
-                loading={isLoading}
-                icon={<Sms size={18} variant="Outline" color="currentColor" />}
-              />
-              <FormInput
-                name="password"
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                loading={isLoading}
-                icon={<Lock1 size={18} variant="Outline" color="currentColor" />}
-              />
+              <Form key="forgot-form" {...forgotForm}>
+                <form onSubmit={forgotForm.handleSubmit(onForgotSubmit)} className="space-y-5">
+                  <FormInput
+                    name="email"
+                    label="Email Address"
+                    type="email"
+                    placeholder="auditor@airline.ng"
+                    loading={isSendingReset}
+                    icon={<Sms size={18} variant="Outline" color="currentColor" />}
+                  />
 
-              {/* Server Error */}
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-start gap-3 rounded-lg bg-destructive/8 border border-destructive/20 px-4 py-3"
-                >
-                  <div className="mt-0.5 h-4 w-4 rounded-full bg-destructive/20 flex-shrink-0 flex items-center justify-center">
-                    <span className="text-destructive text-[10px] font-bold">!</span>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full h-12 font-bold rounded-lg shadow-lg shadow-foreground/10"
+                    disabled={isSendingReset}
+                  >
+                    {isSendingReset ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                        Sending Token…
+                      </span>
+                    ) : (
+                      'Request Reset Link'
+                    )}
+                  </Button>
+
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsForgot(false)}
+                      className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    >
+                      Back to Access Terminal
+                    </button>
                   </div>
-                  <p className="text-sm text-destructive">{error}</p>
-                </motion.div>
-              )}
+                </form>
+              </Form>
+            </>
+          ) : (
+            <>
+              {/* Sign In Header */}
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tight">Access Terminal</h1>
+                <p className="text-sm text-muted-foreground">
+                  Sign in to your AQSAMS account to continue.
+                </p>
+              </div>
 
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full h-12 font-bold rounded-lg shadow-lg shadow-foreground/10"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                    Authenticating…
-                  </span>
-                ) : (
-                  'Sign In'
-                )}
-              </Button>
-            </form>
-          </Form>
+              <Form key="login-form" {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  <FormInput
+                    name="email"
+                    label="Email Address"
+                    type="email"
+                    placeholder="auditor@airline.ng"
+                    loading={isLoading}
+                    icon={<Sms size={18} variant="Outline" color="currentColor" />}
+                  />
+                  <div className="space-y-1.5">
+                    <FormInput
+                      name="password"
+                      label="Password"
+                      type="password"
+                      placeholder="Enter your password"
+                      loading={isLoading}
+                      icon={<Lock1 size={18} variant="Outline" color="currentColor" />}
+                    />
+                    <div className="flex justify-end pr-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsForgot(true)}
+                        className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                  </div>
 
+                  {/* Server Error */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-start gap-3 rounded-lg bg-destructive/8 border border-destructive/20 px-4 py-3"
+                    >
+                      <div className="mt-0.5 h-4 w-4 rounded-full bg-destructive/20 flex-shrink-0 flex items-center justify-center">
+                        <span className="text-destructive text-[10px] font-bold">!</span>
+                      </div>
+                      <p className="text-sm text-destructive">{error}</p>
+                    </motion.div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full h-12 font-bold rounded-lg shadow-lg shadow-foreground/10"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                        Authenticating…
+                      </span>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </>
+          )}
         </motion.div>
       </div>
     </div>

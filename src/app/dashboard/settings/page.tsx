@@ -7,45 +7,62 @@ import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FormInput } from "@/components/shared/FormInput";
-import { FormSelect } from "@/components/shared/FormSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save2, UserTick, ShieldSecurity, Profile2User } from "iconsax-react";
-import { toast } from "sonner"; // Assuming sonner is used, if not I'll check toast options
+import { Save2, UserTick, ShieldSecurity, Key } from "iconsax-react";
+import { toast } from "sonner"; 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { useGetProfileQuery, useUpdateProfileMutation } from "@/redux/api/endpoints/userEndpoints";
+import { useGetProfileQuery, useUpdateProfileMutation, useChangePasswordMutation } from "@/redux/api/endpoints/userEndpoints";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  role: z.string().min(1, "Please select a designation"),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your new password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
 export default function SettingsPage() {
   const { data: profileData, isLoading: loading } = useGetProfileQuery();
   const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
+  const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
   
   const user = profileData?.user;
 
-  const form = useForm<ProfileFormValues>({
+  const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user?.name || "",
-      role: user?.role || "USER",
+    },
+  });
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
   // Sync form when user data loads
   useEffect(() => {
     if (user) {
-      form.reset({
+      profileForm.reset({
         name: user.name || "",
-        role: user.role || "USER",
       });
     }
-  }, [user, form]);
+  }, [user, profileForm]);
 
   if (loading) {
     return (
@@ -99,13 +116,47 @@ export default function SettingsPage() {
     );
   }
 
-  const onSubmit = async (data: ProfileFormValues) => {
+  const onProfileSubmit = async (data: ProfileFormValues) => {
     try {
       await updateProfile(data).unwrap();
       toast.success("Profile updated successfully!");
     } catch (err: any) {
       console.error(err);
       toast.error(err.data?.error || "An error occurred while updating profile.");
+    }
+  };
+
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
+    passwordForm.clearErrors();
+    try {
+      await changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      }).unwrap();
+      toast.success("Password changed successfully!");
+      passwordForm.reset();
+    } catch (err: any) {
+      console.error(err);
+      const errorMessage = err.data?.error || err.data?.message || "Failed to change password.";
+      toast.error(errorMessage);
+      
+      const msg = errorMessage.toLowerCase();
+      if (msg.includes("current password") || msg.includes("incorrect password") || msg.includes("credentials")) {
+        passwordForm.setError("currentPassword", {
+          type: "manual",
+          message: errorMessage,
+        });
+      } else if (msg.includes("new password")) {
+        passwordForm.setError("newPassword", {
+          type: "manual",
+          message: errorMessage,
+        });
+      } else {
+        passwordForm.setError("root", {
+          type: "manual",
+          message: errorMessage,
+        });
+      }
     }
   };
 
@@ -116,6 +167,10 @@ export default function SettingsPage() {
     { label: "Standard Auditor", value: "AUDITOR" },
     { label: "Casual User", value: "USER" },
   ];
+
+  const getRoleLabel = (roleKey?: string | null) => {
+    return roleOptions.find((o) => o.value === roleKey)?.label || roleKey || "Casual User";
+  };
 
   return (
     <div className="space-y-8 pb-20">
@@ -135,13 +190,13 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-lg">Auditor Profile</CardTitle>
-                  <CardDescription className="text-xs">Update your personal information and system designation.</CardDescription>
+                  <CardDescription className="text-xs">Update your personal information and view system designation.</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormInput
                       name="name"
@@ -156,12 +211,14 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <FormSelect
-                    name="role"
-                    label="System Designation"
-                    options={roleOptions}
-                    placeholder="Select your role"
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">System Designation (Role)</label>
+                       <div className="h-10 px-3 flex items-center bg-muted/30 border border-border rounded-md text-muted-foreground text-sm font-medium cursor-not-allowed">
+                         {getRoleLabel(user?.role)}
+                       </div>
+                    </div>
+                  </div>
 
                   <div className="pt-4 border-t flex justify-end">
                     <Button type="submit" disabled={isSaving} className="gap-2 h-10 px-8 shadow-lg">
@@ -174,6 +231,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Password Reset Section */}
           <Card className="shadow-sm border-border/60">
             <CardHeader className="border-b bg-muted/20 pb-4">
               <div className="flex items-center gap-3">
@@ -181,54 +239,51 @@ export default function SettingsPage() {
                   <ShieldSecurity size={20} variant="Bold" color="currentColor" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Security & Access</CardTitle>
-                  <CardDescription className="text-xs">Manage your authentication methods and session security.</CardDescription>
+                  <CardTitle className="text-lg">Change Password</CardTitle>
+                  <CardDescription className="text-xs">Reset or update your terminal login credentials securely.</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/10">
-                <div className="space-y-0.5">
-                  <p className="text-sm font-semibold">Two-Factor Authentication</p>
-                  <p className="text-xs text-muted-foreground">Add an extra layer of security to your account.</p>
-                </div>
-                <Button variant="outline" size="sm" className="h-9 px-4">Enable 2FA</Button>
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/10">
-                <div className="space-y-0.5">
-                  <p className="text-sm font-semibold">Password Management</p>
-                  <p className="text-xs text-muted-foreground">Reset or update your terminal login credentials.</p>
-                </div>
-                <Button variant="outline" size="sm" className="h-9 px-4">Reset Password</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <CardContent className="pt-6">
+              <Form {...passwordForm}>
+                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
+                  <div className="space-y-4">
+                    <FormInput
+                      name="currentPassword"
+                      label="Current Password"
+                      type="password"
+                      placeholder="••••••••"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormInput
+                        name="newPassword"
+                        label="New Password"
+                        type="password"
+                        placeholder="••••••••"
+                      />
+                      <FormInput
+                        name="confirmPassword"
+                        label="Confirm New Password"
+                        type="password"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
 
-        {/* Sidebar Info */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="shadow-sm border-border/60 bg-primary/5 border-primary/10">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2 text-primary">
-                <Profile2User size={18} variant="Bold" color="currentColor" />
-                Account Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Terminal ID</p>
-                <p className="text-xs font-mono font-bold truncate">{user?.id}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Account Created</p>
-                <p className="text-xs font-semibold">Oct 24, 2023</p>
-              </div>
-              <div className="pt-4 border-t border-primary/10">
-                 <div className="p-3 rounded-lg bg-white/50 border border-primary/10 flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Active Session</p>
-                 </div>
-              </div>
+                  {passwordForm.formState.errors.root && (
+                    <div className="text-xs font-semibold text-destructive mt-2 text-right">
+                      {passwordForm.formState.errors.root.message}
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t flex justify-end">
+                    <Button type="submit" disabled={isChangingPassword} className="gap-2 h-10 px-8 shadow-lg">
+                      <Key size={18} variant="Bold" color="currentColor" />
+                      {isChangingPassword ? "Updating..." : "Update Password"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </div>

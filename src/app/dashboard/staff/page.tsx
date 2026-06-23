@@ -118,12 +118,12 @@ export default function StaffManagementPage() {
     if (!selectedUser) return;
     try {
       await deleteUser(selectedUser.id).unwrap();
-      toast.success("User account deleted successfully!");
+      toast.success("User access revoked successfully!");
       setIsDeleteOpen(false);
       setSelectedUser(null);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.data?.error || "Failed to delete user.");
+      toast.error(err.data?.error || "Failed to revoke user access.");
     }
   };
 
@@ -353,7 +353,7 @@ export default function StaffManagementPage() {
         }}
         onConfirm={handleDeleteConfirm}
         title="Revoke Staff Credentials"
-        description={`Are you absolutely sure you want to delete ${selectedUser?.name || "this user"}? This will permanently revoke all API access and remove them from AQSAMS.`}
+        description={`Are you absolutely sure you want to revoke access for ${selectedUser?.name || "this user"}? This will deactivate their credentials, blocking login and access to AQSAMS.`}
         confirmText="Revoke Access"
         cancelText="Keep Account"
       />

@@ -66,7 +66,6 @@ export async function getAllUsers(options?: { limit?: number; offset?: number; s
 
   if (options?.search) {
     const searchPattern = `%${options.search}%`;
-    console.log("[user.service.ts] getAllUsers - searchPattern:", searchPattern);
     query = query.where(
       or(
         ilike(users.name, searchPattern),

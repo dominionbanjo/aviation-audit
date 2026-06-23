@@ -27,10 +27,18 @@ export const userApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
     }),
+    changePassword: builder.mutation<{ success: boolean }, { currentPassword: string; newPassword: string }>({
+      query: (data) => ({
+        url: "/protected/user/change-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
 export const {
   useGetProfileQuery,
   useUpdateProfileMutation,
+  useChangePasswordMutation,
 } = userApi;

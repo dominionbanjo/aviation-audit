@@ -47,6 +47,10 @@ export async function POST(req: Request) {
       name: authUserName,
     });
 
+    if (user.banned) {
+      return NextResponse.json({ error: "Your account has been deactivated." }, { status: 403 });
+    }
+
     // Forward auth response headers (session cookies) to the client
     const responseHeaders = new Headers();
     const setCookie = authRes.headers.get('set-cookie');

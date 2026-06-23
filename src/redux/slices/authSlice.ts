@@ -8,10 +8,16 @@ import type { AuthState, User } from '@/types/auth';
 // include the Origin header automatically — avoiding CORS/CSRF rejections.
 // Custom routes that do server-to-server calls were removed for this reason.
 
+export interface AuthErrorPayload {
+  code?: string;
+  message?: string;
+  error?: string;
+}
+
 export const loginUser = createAsyncThunk<
   User,
   { email: string; password: string },
-  { rejectValue: string }
+  { rejectValue: AuthErrorPayload }
 >('auth/login', async ({ email, password }, { rejectWithValue }) => {
   // Goes through authApiHandler proxy → Neon Auth backend
   const res = await fetch('/api/auth/sign-in/email', {
@@ -20,25 +26,23 @@ export const loginUser = createAsyncThunk<
     body: JSON.stringify({ email, password, callbackURL: '/dashboard' }),
   });
 
-  const data = await res.json() as { user?: User; error?: string; message?: string };
+  const data = await res.json() as AuthErrorPayload & { user?: User };
 
   if (!res.ok) {
-    return rejectWithValue(
-      (data as { message?: string }).message || (data as { error?: string }).error || 'Login failed'
-    );
+    return rejectWithValue(data);
   }
 
   // Always fetch profile to get custom database role and user details
   const profileRes = await fetch('/api/protected/user/profile');
   const profileData = await profileRes.json() as { user?: User; error?: string };
-  if (!profileRes.ok) return rejectWithValue('Login succeeded but profile fetch failed');
+  if (!profileRes.ok) return rejectWithValue({ message: profileData.error || 'Login succeeded but profile fetch failed' });
   return profileData.user as User;
 });
 
 export const signUpUser = createAsyncThunk<
   User,
   { name: string; email: string; password: string },
-  { rejectValue: string }
+  { rejectValue: AuthErrorPayload }
 >('auth/signUp', async (payload, { rejectWithValue }) => {
   // Goes through authApiHandler proxy → Neon Auth backend
   const res = await fetch('/api/auth/sign-up/email', {
@@ -47,18 +51,16 @@ export const signUpUser = createAsyncThunk<
     body: JSON.stringify({ ...payload, callbackURL: '/dashboard' }),
   });
 
-  const data = await res.json() as { user?: User; error?: string; message?: string };
+  const data = await res.json() as AuthErrorPayload & { user?: User };
 
   if (!res.ok) {
-    return rejectWithValue(
-      (data as { message?: string }).message || (data as { error?: string }).error || 'Sign up failed'
-    );
+    return rejectWithValue(data);
   }
 
   // Always fetch profile to get custom database role and user details
   const profileRes = await fetch('/api/protected/user/profile');
   const profileData = await profileRes.json() as { user?: User; error?: string };
-  if (!profileRes.ok) return rejectWithValue('Sign up succeeded but profile fetch failed');
+  if (!profileRes.ok) return rejectWithValue({ message: profileData.error || 'Sign up succeeded but profile fetch failed' });
   return profileData.user as User;
 });
 
@@ -87,7 +89,7 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 
@@ -122,7 +124,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload ?? 'Login failed';
+        const payload = action.payload as any;
+        state.error = typeof payload === 'string' ? payload : (payload?.message || payload?.error || 'Login failed');
       });
 
     // Sign Up
@@ -138,7 +141,8 @@ const authSlice = createSlice({
       })
       .addCase(signUpUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload ?? 'Sign up failed';
+        const payload = action.payload as any;
+        state.error = typeof payload === 'string' ? payload : (payload?.message || payload?.error || 'Sign up failed');
       });
 
     // Fetch Profile
