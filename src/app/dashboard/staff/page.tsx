@@ -241,7 +241,7 @@ export default function StaffManagementPage() {
           inviteForm.reset();
         }}
         title="Invite Staff Member"
-        description="Onboard system auditors or administrators. This generates their Neon Auth account and profile."
+        description="Onboard system auditors or administrators."
         className="sm:max-w-[480px]"
       >
         <Form {...inviteForm}>

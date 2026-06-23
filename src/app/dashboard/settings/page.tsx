@@ -153,7 +153,6 @@ export default function SettingsPage() {
                        <div className="h-10 px-3 flex items-center bg-muted/30 border border-border rounded-md text-muted-foreground text-sm font-medium cursor-not-allowed">
                          {user?.email}
                        </div>
-                       <p className="text-[10px] text-muted-foreground italic">Email configuration is managed via Neon Auth.</p>
                     </div>
                   </div>
 
