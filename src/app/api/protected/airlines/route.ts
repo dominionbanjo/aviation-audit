@@ -1,9 +1,12 @@
 import { withAuth } from "@/lib/api/withAuth";
+import { requireAdmin, requireOtpOrAdmin } from "@/lib/api/rbac";
 import { getAirlinesList, createAirlineEntity } from "@/lib/services/entity.service";
 import { getPaginationParams, getPaginatedResponse } from "@/lib/api/pagination";
 import { NextResponse } from "next/server";
 
-export const GET = withAuth(async (req) => {
+export const GET = withAuth(async (req, ctx) => {
+  const isDenied = requireOtpOrAdmin(ctx);
+  if (isDenied) return isDenied;
   try {
     const { page, limit, offset, search } = getPaginationParams(req.url);
     const { rows, total } = await getAirlinesList({ limit, offset, search });
@@ -14,7 +17,9 @@ export const GET = withAuth(async (req) => {
   }
 });
 
-export const POST = withAuth(async (req) => {
+export const POST = withAuth(async (req, ctx) => {
+  const isDenied = requireAdmin(ctx);
+  if (isDenied) return isDenied;
   try {
     const { name, code } = await req.json();
     if (!name || !code) {

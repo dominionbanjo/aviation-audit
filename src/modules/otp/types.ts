@@ -1,29 +1,5 @@
 import * as z from "zod";
 
-export const FALLBACK_AIRLINES = [
-  { label: "Air Peace", value: "Air Peace" },
-  { label: "Arik Air", value: "Arik Air" },
-  { label: "Max Air", value: "Max Air" },
-  { label: "Ibom Air", value: "Ibom Air" },
-  { label: "United Nigeria", value: "United Nigeria" },
-];
-
-export const FALLBACK_ROUTES = [
-  { label: "LOS-ABV (Lagos to Abuja)", value: "LOS-ABV" },
-  { label: "ABV-LOS (Abuja to Lagos)", value: "ABV-LOS" },
-  { label: "LOS-PHC (Lagos to Port Harcourt)", value: "LOS-PHC" },
-];
-
-export const FALLBACK_DELAY_CODES = [
-  { label: "11 - Passenger Handling", value: "11" },
-  { label: "31 - Aircraft Handling", value: "31" },
-  { label: "41 - Maintenance", value: "41" },
-  { label: "61 - Crew", value: "61" },
-  { label: "71 - Weather", value: "71" },
-  { label: "81 - ATC / Airport Restrictions", value: "81" },
-  { label: "91 - Reactionary Delay", value: "91" },
-];
-
 export const DEPT_OPTIONS = [
   { label: "OCC (Operations)", value: "OCC" },
   { label: "Ground Handling", value: "Ground Handling" },

@@ -14,7 +14,7 @@ export const PATCH = withAuth(async (req, ctx, routeParams) => {
     const { name, role } = await req.json();
 
     if (role) {
-      const validRoles = ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR", "USER"];
+      const validRoles = ["ADMIN", "AUDITOR", "OTP"];
       if (!validRoles.includes(role)) {
         return NextResponse.json({ error: "Invalid role specified." }, { status: 400 });
       }

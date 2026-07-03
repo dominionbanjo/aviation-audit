@@ -43,9 +43,9 @@ export default function TakeAuditSetupPage() {
 
       toast.success("Audit session initialized");
       router.push(`/dashboard/audits/${auditId}/execute`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.data?.error || "Failed to initialize audit session");
+      toast.error((err as { data?: { error?: string } }).data?.error || "Failed to initialize audit session");
     }
   };
 

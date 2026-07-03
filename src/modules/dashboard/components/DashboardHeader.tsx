@@ -36,6 +36,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSideba
 
   const pageTitle = getPageTitle();
 
+  const ROLE_LABELS: Record<string, string> = {
+    ADMIN: "Administrator",
+    AUDITOR: "Auditor",
+    OTP: "OTP Responder",
+  };
+
   const handleLogout = async () => {
     await dispatch(logoutUser());
     router.push("/auth/sign-in");
@@ -89,7 +95,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSideba
             </Avatar>
             <div className="flex flex-col items-start sr-only sm:not-sr-only">
               <span className="text-xs font-semibold leading-none">{user?.name || "Auditor"}</span>
-              <span className="text-[10px] text-muted-foreground mt-0.5">Administrator</span>
+              <span className="text-[10px] text-muted-foreground mt-0.5">{ROLE_LABELS[user?.role || "OTP"] ?? "OTP Responder"}</span>
             </div>
           </button>
 

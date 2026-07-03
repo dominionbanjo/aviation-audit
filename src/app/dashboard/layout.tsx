@@ -15,11 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const [isMounted] = React.useState(true);
 
   // Auth guard — redirect to sign-in with return URL encoded as a query param
   useEffect(() => {
@@ -36,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isAuthenticated) return null;
 
   // Client-side route authorization check
-  const userRole = user?.role || "USER";
+  const userRole = user?.role || "OTP";
   const matchedMenuItem = [...DASHBOARD_MENU_ITEMS]
     .sort((a, b) => b.href.length - a.href.length)
     .find((item) => {
@@ -46,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return pathname.startsWith(item.href);
     });
 
-  const isAllowed = !matchedMenuItem || matchedMenuItem.roles.includes(userRole);
+  const isAllowed = matchedMenuItem ? matchedMenuItem.roles.includes(userRole) : false;
 
   if (!isAllowed) {
     return (
@@ -71,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </p>
               </div>
               <button 
-                onClick={() => router.push(userRole === "USER" ? "/dashboard/otp" : "/dashboard")}
+                onClick={() => router.push(userRole === "OTP" ? "/dashboard/otp" : "/dashboard")}
                 className="px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity text-sm cursor-pointer shadow-md shadow-primary/20"
               >
                 Return

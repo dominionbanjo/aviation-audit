@@ -61,7 +61,7 @@ function ResetPasswordForm() {
         toast.success("Password reset successfully! Please sign in with your new credentials.");
         router.push('/auth/sign-in');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       toast.error("An unexpected error occurred during password reset.");
     } finally {

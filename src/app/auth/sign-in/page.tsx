@@ -33,7 +33,7 @@ function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
-  const { isLoading, error, isAuthenticated } = useAppSelector((s) => s.auth);
+  const { isLoading, error, isAuthenticated, user } = useAppSelector((s) => s.auth);
 
   // Toggle state between Sign In and Forgot Password
   const [isForgot, setIsForgot] = useState(false);
@@ -56,8 +56,14 @@ function SignInForm() {
 
   // Once authenticated, redirect to intended destination
   useEffect(() => {
-    if (isAuthenticated) router.push(redirectTo);
-  }, [isAuthenticated, router, redirectTo]);
+    if (isAuthenticated && user) {
+      if (user.role === "OTP") {
+        router.push("/dashboard/otp");
+      } else {
+        router.push(redirectTo);
+      }
+    }
+  }, [isAuthenticated, router, redirectTo, user]);
 
   useEffect(() => {
     const sub = form.watch(() => { if (error) dispatch(clearError()); });
@@ -67,18 +73,11 @@ function SignInForm() {
   const onSubmit = async (values: FormValues) => {
     try {
       await dispatch(loginUser(values)).unwrap();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login failed:", err);
-      if (err && (err.code === "EMAIL_NOT_VERIFIED" || err.message?.includes("Email not verified") || err.error?.includes("Email not verified"))) {
-        try {
-          await authClient.sendVerificationEmail({
-            email: values.email,
-            callbackURL: `${window.location.origin}/dashboard`
-          });
-          toast.success("Verification link sent to your email!");
-        } catch (emailErr) {
-          console.error("Failed to send verification email:", emailErr);
-        }
+      const errorObj = err as { code?: string; message?: string; error?: string };
+      if (errorObj && (errorObj.code === "EMAIL_NOT_VERIFIED" || errorObj.message?.includes("Email not verified") || errorObj.error?.includes("Email not verified"))) {
+        toast.info("Please verify your email to continue.");
         router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
       }
     }
@@ -98,7 +97,7 @@ function SignInForm() {
         setIsForgot(false);
         forgotForm.reset();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       toast.error("Failed to request password reset.");
     } finally {

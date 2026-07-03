@@ -58,7 +58,7 @@ export function withAuth<TParams = Record<string, string>>(
         userId: data.user.id,
         userEmail: data.user.email ?? `user-${data.user.id}@aqsams.local`,
         userName: data.user.name ?? null,
-        role: dbUser.role ?? "USER",
+        role: dbUser.role ?? "OTP",
       };
 
       return handler(req, ctx, context);

@@ -206,7 +206,7 @@ export async function updateFinding(
     findingStatus?: "open" | "under-review" | "closed";
   }
 ): Promise<void> {
-  const updates: Record<string, any> = { ...payload };
+  const updates: Record<string, unknown> = { ...payload };
 
   if (payload.deadline) {
     updates.deadline = new Date(payload.deadline);

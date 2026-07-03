@@ -1,8 +1,11 @@
 import { withAuth } from "@/lib/api/withAuth";
+import { requireAuditor } from "@/lib/api/rbac";
 import { updateFinding } from "@/lib/services/findings.service";
 import { NextResponse } from "next/server";
 
-export const PATCH = withAuth<{ id: string }>(async (req, _ctx, routeParams) => {
+export const PATCH = withAuth<{ id: string }>(async (req, ctx, routeParams) => {
+  const isDenied = requireAuditor(ctx);
+  if (isDenied) return isDenied;
   try {
     const { id } = await routeParams!.params;
 

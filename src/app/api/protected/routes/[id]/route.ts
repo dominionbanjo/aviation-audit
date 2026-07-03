@@ -1,8 +1,11 @@
 import { withAuth } from "@/lib/api/withAuth";
+import { requireAdmin } from "@/lib/api/rbac";
 import { updateRouteEntity, deleteRouteEntity } from "@/lib/services/entity.service";
 import { NextResponse } from "next/server";
 
-export const PATCH = withAuth(async (req, _ctx, routeParams) => {
+export const PATCH = withAuth(async (req, ctx, routeParams) => {
+  const isDenied = requireAdmin(ctx);
+  if (isDenied) return isDenied;
   try {
     const { id } = await routeParams!.params;
     const body = await req.json();
@@ -14,7 +17,9 @@ export const PATCH = withAuth(async (req, _ctx, routeParams) => {
   }
 });
 
-export const DELETE = withAuth(async (_req, _ctx, routeParams) => {
+export const DELETE = withAuth(async (_req, ctx, routeParams) => {
+  const isDenied = requireAdmin(ctx);
+  if (isDenied) return isDenied;
   try {
     const { id } = await routeParams!.params;
     await deleteRouteEntity(id);

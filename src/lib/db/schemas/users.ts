@@ -3,10 +3,8 @@ import { pgTable, varchar, timestamp, pgEnum, index, boolean } from "drizzle-orm
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const userRoleEnum = pgEnum("user_role", [
   "ADMIN",
-  "MANAGER",
-  "LEAD_AUDITOR",
   "AUDITOR",
-  "USER",
+  "OTP",
 ]);
 
 // ─── Users Table ──────────────────────────────────────────────────────────────
@@ -15,7 +13,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey(), // Neon Auth provides this ID
   email: varchar("email").notNull(),
   name: varchar("name"),
-  role: userRoleEnum("role").default("USER"),
+  role: userRoleEnum("role").default("OTP"),
   banned: boolean("banned").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

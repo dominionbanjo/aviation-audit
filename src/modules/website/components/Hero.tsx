@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { 
   ShieldTick, 
   Chart, 
@@ -50,13 +51,17 @@ export const Hero = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="rounded-lg px-8 h-12 text-sm font-bold shadow-2xl shadow-primary/20 bg-primary hover:bg-primary/90">
-               ACCESS TERMINAL
-               <Cpu size={18} variant="Bold" color="currentColor" className="ml-2" />
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-lg px-8 h-12 text-sm font-bold border-border hover:bg-muted/50">
-               VIEW REGULATORY SPECS
-            </Button>
+            <Link href="/auth/sign-in">
+              <Button size="lg" className="rounded-lg px-8 h-12 text-sm font-bold shadow-2xl shadow-primary/20 bg-primary hover:bg-primary/90">
+                ACCESS TERMINAL
+                <Cpu size={18} variant="Bold" color="currentColor" className="ml-2" />
+              </Button>
+            </Link>
+            <Link href="/documents">
+              <Button size="lg" variant="outline" className="rounded-lg px-8 h-12 text-sm font-bold border-border hover:bg-muted/50">
+                VIEW REGULATORY SPECS
+              </Button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-10 border-t border-border">

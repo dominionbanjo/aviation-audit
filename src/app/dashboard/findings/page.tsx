@@ -125,9 +125,9 @@ export default function FindingsPage() {
         setIsModalOpen(false);
         setSelectedFinding(null);
       }, 1200);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMessage(err?.data?.error || "Failed to update CAR details. Check server connection.");
+      setErrorMessage((err as { data?: { error?: string } }).data?.error || "Failed to update CAR details. Check server connection.");
     }
   };
 

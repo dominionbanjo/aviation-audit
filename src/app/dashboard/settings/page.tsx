@@ -120,9 +120,9 @@ export default function SettingsPage() {
     try {
       await updateProfile(data).unwrap();
       toast.success("Profile updated successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.data?.error || "An error occurred while updating profile.");
+      toast.error((err as { data?: { error?: string } }).data?.error || "An error occurred while updating profile.");
     }
   };
 
@@ -135,9 +135,10 @@ export default function SettingsPage() {
       }).unwrap();
       toast.success("Password changed successfully!");
       passwordForm.reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      const errorMessage = err.data?.error || err.data?.message || "Failed to change password.";
+      const errorObj = err as { data?: { error?: string; message?: string } };
+      const errorMessage = errorObj.data?.error || errorObj.data?.message || "Failed to change password.";
       toast.error(errorMessage);
       
       const msg = errorMessage.toLowerCase();
@@ -162,14 +163,12 @@ export default function SettingsPage() {
 
   const roleOptions = [
     { label: "Administrator", value: "ADMIN" },
-    { label: "Quality Manager", value: "MANAGER" },
-    { label: "Lead Auditor", value: "LEAD_AUDITOR" },
     { label: "Standard Auditor", value: "AUDITOR" },
-    { label: "Casual User", value: "USER" },
+    { label: "OTP Responder", value: "OTP" },
   ];
 
   const getRoleLabel = (roleKey?: string | null) => {
-    return roleOptions.find((o) => o.value === roleKey)?.label || roleKey || "Casual User";
+    return roleOptions.find((o) => o.value === roleKey)?.label || roleKey || "OTP Responder";
   };
 
   return (

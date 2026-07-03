@@ -106,13 +106,13 @@ export const OTP = () => {
                          <span className="text-[10px] text-primary font-mono">FEED_60hz</span>
                       </div>
                       <div className="flex items-end gap-1 h-20 opacity-30">
-                         {[...Array(30)].map((_, i) => (
-                           <div 
-                              key={i} 
-                              className="flex-1 bg-primary rounded-t-[1px]" 
-                              style={{ height: `${Math.random() * 100}%` }} 
-                           />
-                         ))}
+                          {[...Array(30)].map((_, i) => (
+                            <div 
+                               key={i} 
+                               className="flex-1 bg-primary rounded-t-[1px]" 
+                               style={{ height: `${((i % 10) + 1) * 10}%` }} 
+                            />
+                          ))}
                       </div>
                    </div>
                 </div>

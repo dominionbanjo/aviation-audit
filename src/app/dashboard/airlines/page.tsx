@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { 
@@ -56,7 +56,7 @@ export default function AirlinesPage() {
   const pagination = data?.pagination;
 
   const methods = useForm<AirlineFormValues>({
-    resolver: zodResolver(airlineFormSchema) as any,
+    resolver: zodResolver(airlineFormSchema) as Resolver<AirlineFormValues>,
     defaultValues: {
       name: "",
       code: "",

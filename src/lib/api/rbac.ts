@@ -19,7 +19,7 @@ export function requireRoles(ctx: AuthContext, allowedRoles: string[]) {
  * Ensures the user has auditor privileges or higher (Admin, Manager, Lead Auditor, Auditor).
  */
 export function requireAuditor(ctx: AuthContext) {
-  return requireRoles(ctx, ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR"]);
+  return requireRoles(ctx, ["ADMIN", "AUDITOR"]);
 }
 
 /**
@@ -27,5 +27,13 @@ export function requireAuditor(ctx: AuthContext) {
  */
 export function requireAdmin(ctx: AuthContext) {
   return requireRoles(ctx, ["ADMIN"]);
+}
+
+/**
+ * Ensures the user has OTP or Admin privileges.
+ * Used for read-only access to entities needed by OTP responders.
+ */
+export function requireOtpOrAdmin(ctx: AuthContext) {
+  return requireRoles(ctx, ["ADMIN", "OTP"]);
 }
 

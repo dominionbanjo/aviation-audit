@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   useGetAuditQuery, 
@@ -42,22 +42,8 @@ export function AuditExecution({ auditId }: AuditExecutionProps) {
   const questions = template?.categories.flatMap(c => c.questions) ?? [];
   
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Separate local state to track uncommitted changes
+  // Separate local state to track uncommitted changes — seeded from DB responses
   const [localResponses, setLocalResponses] = useState<Record<string, { value: ResponseValue | null, comment: string }>>({});
-
-  // Sync initial responses from DB once
-  useEffect(() => {
-    if (audit?.responses) {
-      const initial: Record<string, { value: ResponseValue | null, comment: string }> = {};
-      audit.responses.forEach(r => {
-        initial[r.questionId] = { 
-          value: r.responseValue as ResponseValue, 
-          comment: r.comment || "" 
-        };
-      });
-      setLocalResponses(prev => ({ ...initial, ...prev }));
-    }
-  }, [audit?.responses]);
 
   if (isLoading) return <ExecutionLoader />;
   if (error || !audit) return <div>Error loading audit.</div>;
@@ -98,7 +84,7 @@ export function AuditExecution({ auditId }: AuditExecutionProps) {
       if (currentIndex < totalQuestions - 1) {
         setCurrentIndex(prev => prev + 1);
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to save progress");
     }
   };
@@ -123,7 +109,7 @@ export function AuditExecution({ auditId }: AuditExecutionProps) {
       await completeAudit(auditId).unwrap();
       toast.success("Audit completed successfully!");
       router.push("/dashboard/audits");
-    } catch (err) {
+    } catch {
       toast.error("Failed to complete audit");
     }
   };

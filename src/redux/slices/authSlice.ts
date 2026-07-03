@@ -124,7 +124,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        const payload = action.payload as any;
+        const payload = action.payload as AuthErrorPayload | string;
         state.error = typeof payload === 'string' ? payload : (payload?.message || payload?.error || 'Login failed');
       });
 
@@ -141,7 +141,7 @@ const authSlice = createSlice({
       })
       .addCase(signUpUser.rejected, (state, action) => {
         state.isLoading = false;
-        const payload = action.payload as any;
+        const payload = action.payload as AuthErrorPayload | string;
         state.error = typeof payload === 'string' ? payload : (payload?.message || payload?.error || 'Sign up failed');
       });
 

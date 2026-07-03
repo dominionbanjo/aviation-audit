@@ -1,13 +1,14 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit2, Trash } from "iconsax-react";
+import { Edit2, Trash, ArrowRotateLeft } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { User } from "@/lib/db/schemas/users";
 
 interface ColumnActions {
   onEdit: (user: { id: string; name: string; role: string }) => void;
   onDelete: (user: { id: string; name: string; role: string }) => void;
+  onRestore: (user: { id: string; name: string; role: string }) => void;
 }
 
 // Helper to render role badge styles
@@ -15,12 +16,10 @@ const getRoleBadgeClass = (role?: string | null) => {
   switch (role) {
     case "ADMIN":
       return "bg-emerald-50 text-emerald-700 border-emerald-200/60";
-    case "MANAGER":
-    case "LEAD_AUDITOR":
-      return "bg-purple-50 text-purple-700 border-purple-200/60";
     case "AUDITOR":
       return "bg-blue-50 text-blue-700 border-blue-200/60";
-    case "USER":
+    case "OTP":
+      return "bg-slate-50 text-slate-700 border-slate-200/60";
     default:
       return "bg-slate-50 text-slate-700 border-slate-200/60";
   }
@@ -30,16 +29,12 @@ const getRoleLabel = (role?: string | null) => {
   switch (role) {
     case "ADMIN":
       return "Administrator";
-    case "MANAGER":
-      return "Quality Manager";
-    case "LEAD_AUDITOR":
-      return "Lead Auditor";
     case "AUDITOR":
       return "Standard Auditor";
-    case "USER":
+    case "OTP":
       return "OTP Responder";
     default:
-      return "Casual User";
+      return "OTP Responder";
   }
 };
 
@@ -104,7 +99,19 @@ export const getStaffColumns = (actions: ColumnActions): ColumnDef<User>[] => [
       const user = row.original;
       return (
         <div className="flex items-center justify-end gap-2">
-          {!user.banned && (
+          {user.banned ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Restore Access"
+              onClick={() => {
+                actions.onRestore({ id: user.id, name: user.name || "", role: user.role || "USER" });
+              }}
+              className="h-8.5 w-8.5 p-0 hover:bg-emerald-50 hover:text-emerald-600 text-slate-400 cursor-pointer"
+            >
+              <ArrowRotateLeft size={16} variant="Outline" color="currentColor" />
+            </Button>
+          ) : (
             <>
               <Button
                 variant="ghost"
@@ -122,7 +129,6 @@ export const getStaffColumns = (actions: ColumnActions): ColumnDef<User>[] => [
                 size="sm"
                 title="Revoke Access"
                 onClick={() => {
-                  actions.onEdit({ id: user.id, name: user.name || "", role: user.role || "USER" });
                   actions.onDelete({ id: user.id, name: user.name || "", role: user.role || "USER" });
                 }}
                 className="h-8.5 w-8.5 p-0 hover:bg-red-50 hover:text-red-600 text-slate-400 cursor-pointer"

@@ -27,7 +27,7 @@ export const POST = withAuth(async (req) => {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[POST /api/protected/user/change-password]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

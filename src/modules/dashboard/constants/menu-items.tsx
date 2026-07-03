@@ -3,6 +3,7 @@ import { Category, DocumentText, ChartSquare, Setting2, ShieldTick, TaskSquare, 
 export interface MenuItem {
   label: string;
   href: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   roles: string[];
 }
@@ -12,31 +13,31 @@ export const DASHBOARD_MENU_ITEMS: MenuItem[] = [
     label: "Overview",
     href: "/dashboard",
     icon: Category,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR"],
+    roles: ["ADMIN", "AUDITOR"],
   },
   {
     label: "Audits History",
     href: "/dashboard/audits",
     icon: TaskSquare,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR"],
+    roles: ["ADMIN", "AUDITOR"],
   },
   {
     label: "Audit Templates",
     href: "/dashboard/audit/templates",
     icon: DocumentText,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR"],
+    roles: ["ADMIN", "AUDITOR"],
   },
   {
     label: "Findings",
     href: "/dashboard/findings",
     icon: SearchStatus,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR"],
+    roles: ["ADMIN", "AUDITOR"],
   },
   {
     label: "OTP Analysis",
     href: "/dashboard/otp",
     icon: ChartSquare,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR", "USER"],
+    roles: ["ADMIN", "AUDITOR", "OTP"],
   },
   {
     label: "Airlines Manager",
@@ -60,7 +61,7 @@ export const DASHBOARD_MENU_ITEMS: MenuItem[] = [
     label: "Reports",
     href: "/dashboard/reports",
     icon: Graph,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR"],
+    roles: ["ADMIN", "AUDITOR"],
   },
   {
     label: "Staff Management",
@@ -72,6 +73,6 @@ export const DASHBOARD_MENU_ITEMS: MenuItem[] = [
     label: "Settings",
     href: "/dashboard/settings",
     icon: Setting2,
-    roles: ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR", "USER"],
+    roles: ["ADMIN", "AUDITOR", "OTP"],
   },
 ];

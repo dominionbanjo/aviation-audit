@@ -1,10 +1,13 @@
 import { withAuth } from "@/lib/api/withAuth";
+import { requireAuditor } from "@/lib/api/rbac";
 import { startAudit, getAuditsPaginated } from "@/lib/services/audit.service";
 import { getPaginationParams, getPaginatedResponse } from "@/lib/api/pagination";
 import { NextResponse } from "next/server";
 
 // ─── GET /api/protected/audits ────────────────────────────────────────────────
-export const GET = withAuth(async (req) => {
+export const GET = withAuth(async (req, ctx) => {
+  const isDenied = requireAuditor(ctx);
+  if (isDenied) return isDenied;
   try {
     const { page, limit, offset, search } = getPaginationParams(req.url);
     const { rows, total } = await getAuditsPaginated({ limit, offset, search });
@@ -16,7 +19,10 @@ export const GET = withAuth(async (req) => {
 });
 
 // ─── POST /api/protected/audits ───────────────────────────────────────────────
-export const POST = withAuth(async (req, { userId }) => {
+export const POST = withAuth(async (req, ctx) => {
+  const isDenied = requireAuditor(ctx);
+  if (isDenied) return isDenied;
+  const { userId } = ctx;
   try {
     const { templateId, location } = await req.json();
 

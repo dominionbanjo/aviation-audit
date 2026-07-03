@@ -32,6 +32,7 @@ import {
   useInviteUserMutation,
   useUpdateUserRoleMutation,
   useDeleteUserMutation,
+  useRestoreUserMutation,
 } from "@/redux/api/endpoints/adminEndpoints";
 
 // ─── Zod Schemas ─────────────────────────────────────────────────────────────
@@ -59,11 +60,13 @@ export default function StaffManagementPage() {
   const [inviteUser, { isLoading: isInviting }] = useInviteUserMutation();
   const [updateUserRole, { isLoading: isUpdatingRole }] = useUpdateUserRoleMutation();
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
 
   // Modals state
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isRestoreOpen, setIsRestoreOpen] = useState(false);
 
   // Selected user state for edit/delete
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string; role: string } | null>(null);
@@ -85,8 +88,8 @@ export default function StaffManagementPage() {
   // Summary Metrics
   const totalStaff = pagination?.total ?? usersList.length;
   const adminCount = usersList.filter((u) => u.role === "ADMIN").length;
-  const auditorCount = usersList.filter((u) => ["AUDITOR", "MANAGER", "LEAD_AUDITOR"].includes(u.role || "")).length;
-  const userCount = usersList.filter((u) => u.role === "USER").length;
+  const auditorCount = usersList.filter((u) => u.role === "AUDITOR").length;
+  const otpCount = usersList.filter((u) => u.role === "OTP").length;
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
   const handleInviteSubmit = async (values: InviteFormValues) => {
@@ -95,9 +98,9 @@ export default function StaffManagementPage() {
       toast.success("User invited and created successfully!");
       setIsInviteOpen(false);
       inviteForm.reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.data?.error || "Failed to invite user.");
+      toast.error((err as { data?: { error?: string } }).data?.error || "Failed to invite user.");
     }
   };
 
@@ -108,9 +111,9 @@ export default function StaffManagementPage() {
       toast.success("User role updated successfully!");
       setIsEditOpen(false);
       setSelectedUser(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.data?.error || "Failed to update role.");
+      toast.error((err as { data?: { error?: string } }).data?.error || "Failed to update role.");
     }
   };
 
@@ -121,18 +124,29 @@ export default function StaffManagementPage() {
       toast.success("User access revoked successfully!");
       setIsDeleteOpen(false);
       setSelectedUser(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.data?.error || "Failed to revoke user access.");
+      toast.error((err as { data?: { error?: string } }).data?.error || "Failed to revoke user access.");
+    }
+  };
+
+  const handleRestoreConfirm = async () => {
+    if (!selectedUser) return;
+    try {
+      await restoreUser(selectedUser.id).unwrap();
+      toast.success("User access restored successfully!");
+      setIsRestoreOpen(false);
+      setSelectedUser(null);
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error((err as { data?: { error?: string } }).data?.error || "Failed to restore user access.");
     }
   };
 
   const roleOptions = [
     { label: "Administrator", value: "ADMIN" },
-    { label: "Quality Manager", value: "MANAGER" },
-    { label: "Lead Auditor", value: "LEAD_AUDITOR" },
     { label: "Standard Auditor", value: "AUDITOR" },
-    { label: "OTP Responder", value: "USER" },
+    { label: "OTP Responder", value: "OTP" },
   ];
 
   const columns = getStaffColumns({
@@ -144,6 +158,10 @@ export default function StaffManagementPage() {
     onDelete: (user) => {
       setSelectedUser(user);
       setIsDeleteOpen(true);
+    },
+    onRestore: (user) => {
+      setSelectedUser(user);
+      setIsRestoreOpen(true);
     },
   });
 
@@ -197,7 +215,7 @@ export default function StaffManagementPage() {
 
         <StatCard
           title="OTP Responders"
-          value={userCount}
+          value={otpCount}
           isLoading={loadingUsers}
           icon={<Profile2User size={24} variant="Bulk" color="currentColor" />}
           iconBgClass="bg-slate-500/5"
@@ -356,6 +374,21 @@ export default function StaffManagementPage() {
         description={`Are you absolutely sure you want to revoke access for ${selectedUser?.name || "this user"}? This will deactivate their credentials, blocking login and access to AQSAMS.`}
         confirmText="Revoke Access"
         cancelText="Keep Account"
+      />
+
+      {/* ── CONFIRM RESTORE DIALOG ──────────────────────────────────────────── */}
+      <ConfirmDialog
+        isOpen={isRestoreOpen}
+        isLoading={isRestoring}
+        onClose={() => {
+          setIsRestoreOpen(false);
+          setSelectedUser(null);
+        }}
+        onConfirm={handleRestoreConfirm}
+        title="Restore Staff Access"
+        description={`Are you sure you want to restore access for ${selectedUser?.name || "this user"}? This will reactivate their credentials and allow login to AQSAMS.`}
+        confirmText="Restore Access"
+        cancelText="Keep Revoked"
       />
     </div>
   );

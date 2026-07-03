@@ -57,7 +57,7 @@ function VerifyEmailForm() {
       } else {
         toast.success("A new verification code has been sent to your email!");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       toast.error("Failed to send verification code.");
     } finally {
@@ -81,7 +81,7 @@ function VerifyEmailForm() {
         toast.success("Account verified successfully! You can now log in.");
         router.push('/auth/sign-in');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       toast.error("An unexpected error occurred during email verification.");
     } finally {

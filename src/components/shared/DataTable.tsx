@@ -95,7 +95,7 @@ export function DataTable<TData, TValue>({
   const finalFilterOptions = React.useMemo(() => {
     if (filterOptions) return filterOptions;
     if (filterKey) {
-      const uniqueValues = Array.from(new Set(data.map((item: any) => item[filterKey])));
+      const uniqueValues = Array.from(new Set(data.map((item) => String((item as Record<string, unknown>)[filterKey]))));
       return [
         { label: `All ${filterKey.replace(/([A-Z])/g, " $1").toLowerCase()}s`, value: "ALL_RECORDS" },
         ...uniqueValues

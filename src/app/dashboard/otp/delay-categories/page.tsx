@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
@@ -60,7 +60,7 @@ export default function DelayCategoriesPage() {
   const pagination = data?.pagination;
 
   const methods = useForm<CategoryFormValues>({
-    resolver: zodResolver(categoryFormSchema) as any,
+    resolver: zodResolver(categoryFormSchema) as Resolver<CategoryFormValues>,
     defaultValues: {
       code: "",
       name: "",

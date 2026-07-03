@@ -6,9 +6,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Airplane, Routing } from "iconsax-react";
 import { getRateColorClass } from "./ComplianceKPIs";
 
+interface AirlineStanding {
+  airline: string;
+  total: number;
+  otp: number;
+  sopRate: number;
+  preventableRate: number;
+}
+
+interface RouteStanding {
+  route: string;
+  total: number;
+  otp: number;
+  sopRate: number;
+  avgDelay: number;
+}
+
 interface ComplianceStandingsProps {
-  airlineStandings: any[];
-  routeStandings: any[];
+  airlineStandings: AirlineStanding[];
+  routeStandings: RouteStanding[];
   isLoading: boolean;
 }
 

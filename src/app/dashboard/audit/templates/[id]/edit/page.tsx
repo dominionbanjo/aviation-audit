@@ -13,7 +13,13 @@ export default function EditAuditTemplatePage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [template, setTemplate] = useState<any>(null);
+  const [template, setTemplate] = useState<{
+    id: string;
+    name: string;
+    locationType: string;
+    regulatoryBase: string;
+    categories: { name: string; questions: { query: string; manualRef?: string | null }[] }[];
+  } | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -25,8 +31,8 @@ export default function EditAuditTemplatePage() {
         if (!res.ok) throw new Error("Template not found or unable to load");
         const data = await res.json();
         setTemplate(data.template);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }

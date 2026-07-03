@@ -22,7 +22,7 @@ export default function CompliancePage() {
   const debouncedSearch = useDebounce(search, 400);
 
   const { data: allRecordsResponse } = useGetOtpRecordsQuery();
-  const records = allRecordsResponse?.data ?? [];
+  const records = useMemo(() => allRecordsResponse?.data ?? [], [allRecordsResponse?.data]);
 
   const { data: paginatedResponse, isLoading } = useGetOtpRecordsQuery({ page, limit, search: debouncedSearch });
   const paginatedRecords = paginatedResponse?.data ?? [];

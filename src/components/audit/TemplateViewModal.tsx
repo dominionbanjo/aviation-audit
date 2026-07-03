@@ -51,7 +51,7 @@ export function TemplateViewModal({ isOpen, onClose, templateId }: TemplateViewM
                 No categories or questions found for this template.
               </div>
             ) : (
-              template.categories?.map((cat: any, index: number) => (
+              template.categories?.map((cat: { id: string; name: string; questions: { id: string; query: string; manualRef?: string | null }[] }, index: number) => (
                 <div key={cat.id} className="border border-border/50 rounded-xl overflow-hidden shadow-sm">
                   <div className="bg-muted/30 border-b border-border/50 px-4 py-3 flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
@@ -77,7 +77,7 @@ export function TemplateViewModal({ isOpen, onClose, templateId }: TemplateViewM
                             </TableCell>
                           </TableRow>
                         ) : (
-                          cat.questions?.map((q: any, qIndex: number) => (
+                          cat.questions?.map((q: { id: string; query: string; manualRef?: string | null }, qIndex: number) => (
                             <TableRow key={q.id} className="border-border/30 hover:bg-muted/20">
                               <TableCell className="text-center text-xs font-medium text-muted-foreground/60 w-16 align-top pt-4">
                                 {index + 1}.{qIndex + 1}
@@ -106,7 +106,7 @@ export function TemplateViewModal({ isOpen, onClose, templateId }: TemplateViewM
             
             <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-4">
               <span className="flex items-center gap-2"><Hierarchy size={14} /> Structural Overview</span>
-              <span>{template.categories?.length || 0} Categories • {template.categories?.reduce((acc: number, c: any) => acc + (c.questions?.length || 0), 0) || 0} Total Questions</span>
+              <span>{template.categories?.length || 0} Categories • {template.categories?.reduce((acc: number, c: { questions?: unknown[] }) => acc + (c.questions?.length || 0), 0) || 0} Total Questions</span>
             </div>
           </div>
         ) : null}

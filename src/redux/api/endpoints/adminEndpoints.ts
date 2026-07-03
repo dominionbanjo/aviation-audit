@@ -75,6 +75,14 @@ export const adminApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Users", id: "LIST" }],
     }),
+
+    restoreUser: builder.mutation<{ user: User }, string>({
+      query: (id) => ({
+        url: `/protected/admin/users/${id}/restore`,
+        method: "POST",
+      }),
+      invalidatesTags: [{ type: "Users", id: "LIST" }],
+    }),
   }),
 });
 
@@ -83,4 +91,5 @@ export const {
   useInviteUserMutation,
   useUpdateUserRoleMutation,
   useDeleteUserMutation,
+  useRestoreUserMutation,
 } = adminApi;

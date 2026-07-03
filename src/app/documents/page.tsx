@@ -175,7 +175,7 @@ export default function DocumentsPage() {
               </div>
               <h3 className="font-bold text-lg">No regulations found</h3>
               <p className="text-sm text-muted-foreground">
-                We couldn't find any document matching "{searchQuery}". Try searching for terms like "Operations", "AOC", or "Airworthiness".
+                We couldn&apos;t find any document matching &quot;{searchQuery}&quot;. Try searching for terms like &quot;Operations&quot;, &quot;AOC&quot;, or &quot;Airworthiness&quot;.
               </p>
             </div>
           ) : (
@@ -257,7 +257,7 @@ export default function DocumentsPage() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[10px] font-mono text-primary uppercase font-bold tracking-wider leading-none">
-                      {activeDoc.part} // Civil Aviation Regulations
+                      {activeDoc.part} — Civil Aviation Regulations
                     </span>
                     <h2 className="text-sm font-bold truncate text-slate-100 mt-1 leading-snug">
                       {activeDoc.title}
@@ -281,7 +281,7 @@ export default function DocumentsPage() {
 
               {/* Frame viewer */}
               <div className="flex-1 w-full bg-slate-800 relative">
-                {/* Embed PDF inside an iframe, toolbar=0 & navpanes=0 disables downloading capabilities */}
+                {/* Embed PDF inside an iframe, toolbar=0 and navpanes=0 disables downloading capabilities */}
                 <iframe
                   src={`/Documents/${activeDoc.filename}#toolbar=0&navpanes=0&scrollbar=1`}
                   className="w-full h-full border-none bg-slate-800"

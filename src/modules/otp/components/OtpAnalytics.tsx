@@ -30,11 +30,36 @@ import {
 } from "recharts";
 import { CHART_COLORS } from "../types";
 
+interface AirlineItem {
+  airline: string;
+  totalFlights: number;
+  otp: number;
+}
+
+interface RouteItem {
+  route: string;
+  avgDelay: number;
+  otp: number;
+}
+
+interface DelayCategoryItem {
+  name: string;
+  value: number;
+}
+
+interface OtpSummaryData {
+  totalFlights?: number;
+  otpPercentage?: number;
+  delayedFlights?: number;
+  averageDelay?: number;
+  trend?: { date: string; otp: number }[];
+}
+
 interface OtpAnalyticsProps {
-  summary: any;
-  airlineList: any[];
-  routeList: any[];
-  delayCategories: any[];
+  summary: OtpSummaryData | undefined;
+  airlineList: AirlineItem[];
+  routeList: RouteItem[];
+  delayCategories: DelayCategoryItem[];
   isSummaryLoading: boolean;
   isAirlinesLoading: boolean;
   isCategoriesLoading: boolean;
@@ -107,7 +132,7 @@ export function OtpAnalytics({
             {isSummaryLoading ? (
               <div className="h-full w-full flex items-end gap-2 px-8 pb-12">
                 {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="flex-1 w-full rounded-t-lg bg-muted/40" style={{ height: `${20 + Math.random() * 60}%` }} />
+                  <Skeleton key={i} className="flex-1 w-full rounded-t-lg bg-muted/40" style={{ height: `${20 + (i * 10)}%` }} />
                 ))}
               </div>
             ) : (
@@ -166,9 +191,9 @@ export function OtpAnalytics({
                   <Tooltip />
                   <Legend
                     verticalAlign="bottom"
-                    formatter={(_val, entry: any) => (
+                    formatter={(_val: string, entry: { payload?: object }) => (
                       <span className="text-[9px] font-semibold text-muted-foreground">
-                        {entry.payload.name} ({entry.payload.value})
+                        {String((entry.payload as Record<string, unknown>)?.name ?? _val)} ({String((entry.payload as Record<string, unknown>)?.value ?? 0)})
                       </span>
                     )}
                   />

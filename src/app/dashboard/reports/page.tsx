@@ -91,7 +91,9 @@ export default function ReportsPage() {
       if (saved) {
         try {
           return JSON.parse(saved);
-        } catch (e) {}
+        } catch {
+          // ignore parse errors
+        }
       }
     }
     return [
@@ -135,9 +137,9 @@ export default function ReportsPage() {
   const { data: findingsData, isLoading: isFindingsLoading } = useGetFindingsQuery();
   const { data: otpRecords, isLoading: isOtpLoading } = useGetOtpRecordsQuery();
 
-  const audits = auditsData?.data ?? [];
-  const findings = findingsData?.data ?? [];
-  const otpLogs = otpRecords?.data ?? [];
+  const audits = useMemo(() => auditsData?.data ?? [], [auditsData?.data]);
+  const findings = useMemo(() => findingsData?.data ?? [], [findingsData?.data]);
+  const otpLogs = useMemo(() => otpRecords?.data ?? [], [otpRecords?.data]);
 
   // Filter thresholds
   const dateLimit = useMemo(() => {

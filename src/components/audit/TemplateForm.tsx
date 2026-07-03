@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,9 +32,20 @@ import {
 
 const makeId = () => crypto.randomUUID();
 
+interface CategoryInput {
+  name: string;
+  questions: { query: string; manualRef?: string | null }[];
+}
+
 interface TemplateFormProps {
   mode: "create" | "edit";
-  initialData?: any;
+  initialData?: {
+    id: string;
+    name: string;
+    locationType: string;
+    regulatoryBase: string;
+    categories: CategoryInput[];
+  };
 }
 
 export function TemplateForm({ mode, initialData }: TemplateFormProps) {
@@ -50,23 +61,18 @@ export function TemplateForm({ mode, initialData }: TemplateFormProps) {
   const [regulatoryBase, setRegulatoryBase] = useState(initialData?.regulatoryBase || "ncaa");
 
   // ─── Categories state ──────────────────────────────────────────────────────
-  const [categories, setCategories] = useState<CategoryDraft[]>([]);
-
-  useEffect(() => {
-    if (mode === "edit" && initialData?.categories) {
-      setCategories(
-        initialData.categories.map((c: any) => ({
+  const seededCategories: CategoryDraft[] = (mode === "edit" && initialData?.categories)
+    ? initialData.categories.map((c) => ({
+        localId: makeId(),
+        name: c.name,
+        questions: c.questions.map((q) => ({
           localId: makeId(),
-          name: c.name,
-          questions: c.questions.map((q: any) => ({
-            localId: makeId(),
-            query: q.query,
-            manualRef: q.manualRef || "",
-          })),
-        }))
-      );
-    }
-  }, [mode, initialData]);
+          query: q.query,
+          manualRef: q.manualRef || "",
+        })),
+      }))
+    : [];
+  const [categories, setCategories] = useState<CategoryDraft[]>(seededCategories);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -151,15 +157,16 @@ export function TemplateForm({ mode, initialData }: TemplateFormProps) {
         })),
       };
 
-      if (mode === "edit") {
+      if (mode === "edit" && initialData) {
         await updateTemplate({ id: initialData.id, data }).unwrap();
       } else {
         await createTemplate(data).unwrap();
       }
 
       router.push("/dashboard/audit/templates");
-    } catch (err: any) {
-      setSaveError(err.data?.error || err.message || "Save failed");
+    } catch (err: unknown) {
+      const e = err as { data?: { error?: string }; message?: string };
+      setSaveError(e.data?.error || e.message || "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -255,10 +262,10 @@ export function TemplateForm({ mode, initialData }: TemplateFormProps) {
           {categories.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border h-60 text-muted-foreground text-sm gap-3">
               <AddCircle size={32} variant="Outline" color="currentColor" className="opacity-40" />
-              <p>No categories yet. Click <strong className="text-foreground">"Add Category Group"</strong> to start.</p>
+              <p>No categories yet. Click <strong className="text-foreground">&quot;Add Category Group&quot;</strong> to start.</p>
             </div>
           ) : (
-            categories.map((cat, _ci) => (
+            categories.map((cat) => (
               <Card key={cat.localId} className="shadow-sm overflow-hidden border-border hover:border-primary/20 transition-all">
                 <CardHeader className="bg-muted/50 border-b py-3 px-5 flex flex-row items-center justify-between">
                   <Input

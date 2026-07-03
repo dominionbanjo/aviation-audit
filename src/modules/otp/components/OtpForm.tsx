@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   DocumentText,
@@ -39,7 +39,7 @@ export function OtpForm({
   const [currentStep, setCurrentStep] = useState(1);
 
   const methods = useForm<OtpFormValues>({
-    resolver: zodResolver(otpFormSchema) as any,
+    resolver: zodResolver(otpFormSchema) as Resolver<OtpFormValues>,
     defaultValues: {
       flightNumber: "",
       aircraftRegistration: "",
@@ -202,7 +202,7 @@ export function OtpForm({
                 <h3 className="text-sm font-bold text-foreground border-l-4 border-primary pl-2 uppercase tracking-wide">
                   Section 1: Flight Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormInput
                     name="flightNumber"
                     label="Flight Number"
@@ -246,7 +246,7 @@ export function OtpForm({
                 <h3 className="text-sm font-bold text-foreground border-l-4 border-purple-500 pl-2 uppercase tracking-wide">
                   Section 2: Schedule & Dispatch Times
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormInput
                     name="scheduledDeparture"
                     type="time"
@@ -358,7 +358,7 @@ export function OtpForm({
                 <h3 className="text-sm font-bold text-foreground border-l-4 border-red-500 pl-2 uppercase tracking-wide">
                   Section 4: Operational Responsibility
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                   <FormSelect
                     name="responsibleDepartment"
                     label="Primary Responsible Department"
@@ -417,7 +417,7 @@ export function OtpForm({
                 <h3 className="text-sm font-bold text-foreground border-l-4 border-indigo-500 pl-2 uppercase tracking-wide">
                   Section 5: Phase-Specific Duration Analysis (in Minutes)
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <FormInput name="boardingDelay" type="number" label="Boarding" min="0" />
                   <FormInput name="refuelingDelay" type="number" label="Refueling" min="0" />
                   <FormInput name="pushbackDelay" type="number" label="Pushback" min="0" />
@@ -434,7 +434,7 @@ export function OtpForm({
                 <h3 className="text-sm font-bold text-foreground border-l-4 border-emerald-500 pl-2 uppercase tracking-wide">
                   Section 6: Compliance Controls & CAR Plan
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3 p-4 border rounded-xl bg-muted/30">
                     <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block mb-2">
                       Regulatory Flags

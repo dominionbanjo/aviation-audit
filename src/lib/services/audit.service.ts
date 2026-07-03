@@ -234,7 +234,7 @@ export async function getDashboardSummary() {
           eq(auditQuestions.severity, "Critical")
         ));
       criticalFindingsCount = Number(criticalResult[0]?.count || 0);
-    } catch (e) {
+    } catch {
       console.warn("Severity columns missing or error, using fallback for critical findings");
       criticalFindingsCount = Number(openFindings); // Fallback
     }
@@ -300,7 +300,7 @@ export async function getDashboardRecent() {
                f.question?.severity === "Major" ? "text-amber-500 bg-amber-500/10 border-amber-500/20" : 
                "text-blue-500 bg-blue-500/10 border-blue-500/20"
       }));
-    } catch (e) {
+    } catch {
       console.warn("Recent findings query failed (missing columns?), using basic fallback");
       const baseFindings = await db.query.auditResponses.findMany({ 
         limit: 5, 
@@ -309,7 +309,7 @@ export async function getDashboardRecent() {
       });
       recentFindings = baseFindings.map(f => ({
         desc: "Requires Audit Review",
-        audit: (f.audit as any)?.refNo || "Unknown", // Temporarily keeping any for the nested join until I fix types for baseFindings
+        audit: (f.audit as { refNo?: string })?.refNo || "Unknown",
         sev: "Minor",
         color: "text-blue-500 bg-blue-500/10 border-blue-500/20"
       }));
@@ -376,7 +376,7 @@ export async function getDashboardCharts() {
     }));
 
     // SEVERITY BREAKDOWN: Real distribution
-    let severityData = [
+    const severityData = [
       { name: "Critical", value: 0, color: "#ef4444" },
       { name: "Major", value: 0, color: "#f59e0b" },
       { name: "Minor", value: 0, color: "#3b82f6" },
@@ -397,7 +397,7 @@ export async function getDashboardCharts() {
         const item = severityData.find(d => d.name === s.severity);
         if (item) item.value = Number(s.count);
       });
-    } catch (e) {
+    } catch {
       console.warn("Severity pie chart data failed (missing columns/data), showing zeros");
     }
 

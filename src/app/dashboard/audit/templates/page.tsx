@@ -52,9 +52,9 @@ export default function AuditTemplatesPage() {
       await deleteTemplate(deleteTemplateId).unwrap();
       setDeleteTemplateId(null);
       toast.success("Template deleted successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.data?.error || "Failed to delete");
+      alert((err as { data?: { error?: string } }).data?.error || "Failed to delete");
     }
   };
 

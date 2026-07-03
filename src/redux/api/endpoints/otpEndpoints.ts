@@ -103,7 +103,7 @@ export const otpApi = apiSlice.injectEndpoints({
       providesTags: [{ type: "Otp", id: "RECORDS" }],
     }),
 
-    submitOtpQuestionnaire: builder.mutation<{ id: string }, any>({
+    submitOtpQuestionnaire: builder.mutation<{ id: string }, Record<string, unknown>>({
       query: (data) => ({
         url: "/questionnaire/submit",
         method: "POST",

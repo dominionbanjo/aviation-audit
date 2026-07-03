@@ -52,7 +52,7 @@ export const POST = withAuth(async (req, ctx) => {
     }
 
     // Validate role
-    const validRoles = ["ADMIN", "MANAGER", "LEAD_AUDITOR", "AUDITOR", "USER"];
+    const validRoles = ["ADMIN", "AUDITOR", "OTP"];
     if (!validRoles.includes(role)) {
       return NextResponse.json(
         { error: "Invalid role specified." },
@@ -97,7 +97,7 @@ export const POST = withAuth(async (req, ctx) => {
       id: authUser.id,
       email: authUser.email,
       name: authUser.name,
-      role: role as any,
+      role: role as 'ADMIN' | 'AUDITOR' | 'OTP',
     });
 
     // Send verification / welcome email using the configured Neon SMTP provider

@@ -22,13 +22,6 @@ import { useGetDashboardChartsQuery } from "@/redux/api/endpoints/auditEndpoints
 
 export const AnalyticsCharts: React.FC = () => {
   const { data: charts, isLoading } = useGetDashboardChartsQuery();
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return <div className="h-[300px]" />;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -41,7 +34,7 @@ export const AnalyticsCharts: React.FC = () => {
           {isLoading ? (
             <div className="h-full w-full flex items-end gap-2 px-8 pb-12">
               {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="flex-1 w-full rounded-t-lg" style={{ height: `${20 + Math.random() * 60}%` }} />
+                <Skeleton key={i} className="flex-1 w-full rounded-t-lg" style={{ height: `${20 + (i * 10)}%` }} />
               ))}
             </div>
           ) : (
